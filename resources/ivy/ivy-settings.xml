@@ -1,0 +1,34 @@
+<ivysettings>
+  <settings defaultResolver="chain-resolver"/>
+  <credentials host="development.adaptris.net" realm="Sonatype Nexus Repository Manager" username="${ivy.user}" passwd="${ivy.password}"/>
+
+  <property name="nexus-base-url" value="https://development.adaptris.net"/>
+
+  <property name="nexus-public" value="${nexus-base-url}/nexus/content/groups/public"/>
+  <property name="nexus-private" value="${nexus-base-url}/nexus/content/groups/private"/>
+  <property name="nexus-releases" value="${nexus-base-url}/nexus/content/repositories/releases"/>
+  <property name="nexus-snapshots" value="${nexus-base-url}/nexus/content/repositories/snapshots"/>
+  <property name="thirdparty-snapshots" value="${nexus-base-url}/nexus/content/groups/thirdparty-snapshots/"/>
+  <property name="nexus-private-snapshots" value="${nexus-base-url}/nexus/content/repositories/adaptris-private-snapshots/"/>
+  <property name="nexus-private-releases" value="${nexus-base-url}/nexus/content/repositories/adaptris-private-releases/"/>
+  <property name="local-m2-repo" value="${user.home}/.m2/repository/" />
+  <resolvers>
+    <chain name="chain-resolver">
+      <!--
+      <filesystem name="local-maven-repo" m2compatible="true" local="true">
+        <artifact pattern="${local-m2-repo}/[organisation]/[module]/[revision]/[module]-[revision].[ext]" />
+        <ivy pattern="${local-m2-repo}/[organisation]/[module]/[revision]/[module]-[revision].pom" />
+      </filesystem>
+      -->
+      <ibiblio name="nexus-snapshots" m2compatible="true" root="${nexus-snapshots}" changingPattern=".*SNAPSHOT.*" checkmodified="true"/>
+      <ibiblio name="nexus-releases" m2compatible="true" root="${nexus-releases}"/>
+      <ibiblio name="nexus-public" m2compatible="true" root="${nexus-public}"/>
+      <ibiblio name="nexus-private" m2compatible="true" root="${nexus-private}"/>
+      <ibiblio name="thirdparty-snapshots" m2compatible="true" root="${thirdparty-snapshots}" changingPattern=".*SNAPSHOT.*" checkmodified="true"/>      
+      <ibiblio name="nexus-private-snapshots" m2compatible="true" root="${nexus-private-snapshots}" changingPattern=".*SNAPSHOT.*" checkmodified="true"/>
+      <ibiblio name="nexus-private-releases" m2compatible="true" root="${nexus-private-releases}"/>
+    </chain>
+  </resolvers>
+</ivysettings>
+
+
