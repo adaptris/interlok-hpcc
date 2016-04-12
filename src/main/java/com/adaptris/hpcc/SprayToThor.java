@@ -14,6 +14,7 @@ import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.ProduceOnlyProducerImp;
 import com.adaptris.core.lms.FileBackedMessage;
+import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias("spray-to-thor")
@@ -24,7 +25,6 @@ public class SprayToThor extends ProduceOnlyProducerImp {
   private String dfuplusCommand;
   private FORMAT format;
   private int maxRecordSize = 8192;
-  private String destinationLogicalFileName;
   private String server;
   private String cluster;
   private String username;
@@ -86,7 +86,7 @@ public class SprayToThor extends ProduceOnlyProducerImp {
           String.format("format=%s", getFormat().name().toLowerCase()),
           String.format("maxrecordsize=%d", getMaxRecordSize()),
           String.format("srcfile=%s", sourceFile.getCanonicalPath()),
-          String.format("dstname=%s", getDestinationLogicalFileName()),
+          String.format("dstname=%s", getDestination().getDestination(msg)),
           String.format("server=%s", getServer()),
           String.format("dstcluster=%s", getCluster()),
           String.format("username=%s", getUsername()),
@@ -116,6 +116,8 @@ public class SprayToThor extends ProduceOnlyProducerImp {
       throw new ProduceException("Unable to start process", e);
     } catch (InterruptedException e) {
       throw new ProduceException("We got interrupted while waiting for the process to finish.");
+    } catch (CoreException e) {
+      throw ExceptionHelper.wrapProduceException(e);
     }
   }
 
@@ -143,14 +145,6 @@ public class SprayToThor extends ProduceOnlyProducerImp {
     this.maxRecordSize = maxRecordSize;
   }
   
-  public String getDestinationLogicalFileName() {
-    return destinationLogicalFileName;
-  }
-
-  public void setDestinationLogicalFileName(String destinationLogicalFileName) {
-    this.destinationLogicalFileName = destinationLogicalFileName;
-  }
-
   public String getServer() {
     return server;
   }
