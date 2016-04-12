@@ -7,7 +7,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.validator.constraints.NotBlank;
 
+import com.adaptris.annotation.DisplayOrder;
+import com.adaptris.annotation.InputFieldHint;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.ProduceDestination;
@@ -18,16 +21,21 @@ import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias("spray-to-thor")
+@DisplayOrder(order = {"dfuplusCommand", "format", "maxRecordSize", "server", "cluster", "username", "password", "overwrite"})
 public class SprayToThor extends ProduceOnlyProducerImp {
 
   public enum FORMAT { CSV, FIXED; }
 
+  @NotBlank
   private String dfuplusCommand;
   private FORMAT format;
   private int maxRecordSize = 8192;
+  @NotBlank
   private String server;
+  @NotBlank
   private String cluster;
   private String username;
+  @InputFieldHint(style = "PASSWORD")
   private String password;
   private boolean overwrite;
 
