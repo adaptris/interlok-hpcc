@@ -4,10 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.Executor;
-import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.FileUtils;
 
@@ -17,8 +13,6 @@ import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.lms.FileBackedMessage;
 import com.adaptris.core.util.ExceptionHelper;
-import com.adaptris.security.password.Password;
-import com.adaptris.util.stream.Slf4jLoggingOutputStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias("spray-to-thor")
@@ -49,34 +43,16 @@ public class SprayToThor extends SprayToThorImpl {
         throw new ProduceException("Unable to write temporary file", e);
       }
     }
-    int exit = 0;
-    // Create DFU command
-    // String cmd = "dfuplus action=%s format=%s maxrecordsize=%d sourcefile=%s dstname=%s server=%s dstcluster=%s username=%s
-    // password=%s overwrite=%d";
-    try (Slf4jLoggingOutputStream out = new Slf4jLoggingOutputStream(log, "DEBUG")) {
-      Executor cmd = new DefaultExecutor();
-      ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutMs());
-      cmd.setWatchdog(watchdog);
-      CommandLine commandLine = new CommandLine(getDfuplusCommand());
-      commandLine.addArgument("action=spray");
+    
+    try {
+      CommandLine commandLine = createCommand();
       commandLine.addArgument(String.format("format=%s", getFormat().name().toLowerCase()));
       commandLine.addArgument(String.format("maxrecordsize=%d", getMaxRecordSize()));
       commandLine.addArgument(String.format("srcfile=%s", sourceFile.getCanonicalPath()));
       commandLine.addArgument(String.format("dstname=%s", destination.getDestination(msg)));
-      commandLine.addArgument(String.format("server=%s", getServer()));
-      commandLine.addArgument(String.format("dstcluster=%s", getCluster()));
-      commandLine.addArgument(String.format("username=%s", getUsername()));
-      commandLine.addArgument(String.format("password=%s", Password.decode(getPassword())));
-      commandLine.addArgument(String.format("overwrite=%d", overwrite() ? 1 : 0));
-      PumpStreamHandler pump = new PumpStreamHandler(out);
-      cmd.setStreamHandler(pump);
-      log.trace("Executing {}", commandLine);
-      exit = cmd.execute(commandLine);
+      execute(commandLine);
     } catch (Exception e) {
       throw ExceptionHelper.wrapProduceException(e);
-    }
-    if (exit != 0) {
-      throw new ProduceException("Spray failed with exit code " + exit);
     }
   }
 

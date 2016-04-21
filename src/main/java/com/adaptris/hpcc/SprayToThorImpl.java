@@ -1,13 +1,29 @@
 package com.adaptris.hpcc;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import javax.validation.Valid;
+
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.Executor;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.adaptris.annotation.InputFieldHint;
 import com.adaptris.core.CoreException;
+import com.adaptris.core.ProduceException;
 import com.adaptris.core.ProduceOnlyProducerImp;
+import com.adaptris.core.util.ExceptionHelper;
+import com.adaptris.security.exc.PasswordException;
+import com.adaptris.security.password.Password;
 import com.adaptris.util.TimeInterval;
+import com.adaptris.util.stream.Slf4jLoggingOutputStream;
 
 public abstract class SprayToThorImpl extends ProduceOnlyProducerImp {
 
@@ -23,6 +39,7 @@ public abstract class SprayToThorImpl extends ProduceOnlyProducerImp {
   private String password;
 
   private Boolean overwrite;
+  @Valid
   private TimeInterval timeout;
 
   @Override
@@ -116,8 +133,53 @@ public abstract class SprayToThorImpl extends ProduceOnlyProducerImp {
     this.timeout = timeout;
   }
 
-  long timeoutMs() {
+  protected long timeoutMs() {
     return getTimeout() != null ? getTimeout().toMilliseconds() : DEFAULT_TIMEOUT.toMilliseconds();
   }
 
+  protected void execute(CommandLine cmdLine) throws ProduceException {
+    int exit = 0;
+    // Create DFU command
+    // String cmd = "dfuplus action=%s format=%s maxrecordsize=%d sourcefile=%s dstname=%s server=%s dstcluster=%s username=%s
+    // password=%s overwrite=%d";
+    try (Slf4jLoggingOutputStream out = new Slf4jLoggingOutputStream(log, "DEBUG")) {
+      Executor cmd = new DefaultExecutor();
+      ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutMs());
+      cmd.setWatchdog(watchdog);
+      PumpStreamHandler pump = new PumpStreamHandler(out);
+      cmd.setStreamHandler(pump);
+      log.trace("Executing {}", cmdLine);
+      exit = cmd.execute(cmdLine);
+    } catch (Exception e) {
+      throw ExceptionHelper.wrapProduceException(e);
+    }
+    if (exit != 0) {
+      throw new ProduceException("Spray failed with exit code " + exit);
+    }
+  }
+
+
+  protected CommandLine createCommand() throws PasswordException, IOException {
+    File dfuPlus = validateCmd(getDfuplusCommand());
+    CommandLine cmdLine = new CommandLine(dfuPlus.getCanonicalPath());
+    cmdLine.addArgument("action=spray");
+    cmdLine.addArgument(String.format("server=%s", getServer()));
+    cmdLine.addArgument(String.format("dstcluster=%s", getCluster()));
+    if (!isBlank(getUsername())) {
+      cmdLine.addArgument(String.format("username=%s", getUsername()));
+    }
+    if (!isBlank(getPassword())) {
+      cmdLine.addArgument(String.format("password=%s", Password.decode(getPassword())));
+    }
+    cmdLine.addArgument(String.format("overwrite=%d", overwrite() ? 1 : 0));
+    return cmdLine;
+  }
+
+  private File validateCmd(String cmd) throws IOException {
+    File dfuPlus = new File(cmd);
+    if (dfuPlus.exists() && dfuPlus.isFile() && dfuPlus.canExecute()) {
+      return dfuPlus;
+    }
+    throw new IOException("Can't execute [" + dfuPlus.getCanonicalPath() + "]");
+  }
 }

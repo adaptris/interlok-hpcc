@@ -1,19 +1,16 @@
 package com.adaptris.hpcc;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
+import java.io.File;
+
 import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.Executor;
-import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.lang.StringUtils;
 
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.ExceptionHelper;
-import com.adaptris.security.password.Password;
-import com.adaptris.util.stream.Slf4jLoggingOutputStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
@@ -41,32 +38,17 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
     // dfuplus action=spray srcfile=/var/lib/HPCCSystems/mydropzone/historical-weather/adapter-agility-historic-out/*
     // dstcluster=mythor dstname=zzlc::json::historical_weather_04 overwrite=1 PREFIX=FILENAME,FILESIZE
     // server= nosplit=1 username= password=
-    try (Slf4jLoggingOutputStream out = new Slf4jLoggingOutputStream(log, "DEBUG")) {
-      Executor cmd = new DefaultExecutor();
-      ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutMs());
-      cmd.setWatchdog(watchdog);
-      CommandLine commandLine = new CommandLine(getDfuplusCommand());
-      commandLine.addArgument("action=spray");
-      commandLine.addArgument(String.format("srcfile=%s", getSourceFiles(msg)));
+    try {
+      CommandLine commandLine = createCommand();
+      commandLine.addArgument(String.format("srcfile=%s", getSource(msg)));
       commandLine.addArgument(String.format("dstname=%s", destination.getDestination(msg)));
-      commandLine.addArgument(String.format("server=%s", getServer()));
-      commandLine.addArgument(String.format("dstcluster=%s", getCluster()));
-      commandLine.addArgument(String.format("username=%s", getUsername()));
-      commandLine.addArgument(String.format("password=%s", Password.decode(getPassword())));
-      commandLine.addArgument(String.format("overwrite=%d", overwrite() ? 1 : 0));
-      if (!StringUtils.isBlank(getPrefix())) {
-        commandLine.addArgument(String.format("PREFIX=%d", getPrefix()));
+      if (!isBlank(getPrefix())) {
+        commandLine.addArgument(String.format("PREFIX=%s", getPrefix()));
       }
       commandLine.addArgument("nosplit=1");
-      PumpStreamHandler pump = new PumpStreamHandler(out);
-      cmd.setStreamHandler(pump);
-      log.trace("Executing {}", commandLine);
-      exit = cmd.execute(commandLine);
+      execute(commandLine);
     } catch (Exception e) {
       throw ExceptionHelper.wrapProduceException(e);
-    }
-    if (exit != 0) {
-      throw new ProduceException("Spray failed with exit code " + exit);
     }
   }
 
@@ -100,12 +82,15 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
     this.sourceDirectoryKey = s;
   }
 
-  private String getSourceFiles(AdaptrisMessage msg) {
-    String dir = "";
+  private String getSource(AdaptrisMessage msg) throws Exception {
+    String result = "";
     if (msg.headersContainsKey(getSourceDirectoryKey())) {
-      dir = String.format("%1$s/*", msg.getMetadataValue(getSourceDirectoryKey()));
+      String dir = msg.getMetadataValue(getSourceDirectoryKey());
+      // Now turn it into a canonical path so that it's platform correct as
+      // it appears to D:/hpcc/json-weatherdata/weather02/* doesn't work well.
+      result = new File(String.format("%1$s/*", dir)).getCanonicalPath();
     }
-    log.trace("Source Files [{}]", dir);
-    return dir;
+    log.trace("Source Files [{}]", result);
+    return result;
   }
 }
