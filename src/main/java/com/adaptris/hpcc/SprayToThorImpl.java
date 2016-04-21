@@ -13,8 +13,11 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.output.NullOutputStream;
+import org.apache.commons.io.output.TeeOutputStream;
 import org.hibernate.validator.constraints.NotBlank;
 
+import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.InputFieldHint;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.ProduceException;
@@ -41,6 +44,8 @@ public abstract class SprayToThorImpl extends ProduceOnlyProducerImp {
   private Boolean overwrite;
   @Valid
   private TimeInterval timeout;
+  @AdvancedConfig
+  private Boolean parseOutput;
 
   @Override
   public void close() {
@@ -139,10 +144,12 @@ public abstract class SprayToThorImpl extends ProduceOnlyProducerImp {
 
   protected void execute(CommandLine cmdLine) throws ProduceException {
     int exit = 0;
+    boolean success = false;
     // Create DFU command
     // String cmd = "dfuplus action=%s format=%s maxrecordsize=%d sourcefile=%s dstname=%s server=%s dstcluster=%s username=%s
     // password=%s overwrite=%d";
-    try (Slf4jLoggingOutputStream out = new Slf4jLoggingOutputStream(log, "DEBUG")) {
+    DfuplusOutputParser outputParser = createParser();
+    try (TeeOutputStream out = new TeeOutputStream(new Slf4jLoggingOutputStream(log, "DEBUG"), outputParser)) {
       Executor cmd = new DefaultExecutor();
       ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutMs());
       cmd.setWatchdog(watchdog);
@@ -153,8 +160,9 @@ public abstract class SprayToThorImpl extends ProduceOnlyProducerImp {
     } catch (Exception e) {
       throw ExceptionHelper.wrapProduceException(e);
     }
-    if (exit != 0) {
-      throw new ProduceException("Spray failed with exit code " + exit);
+    success = outputParser.wasSuccessful() && exit == 0;
+    if (!success) {
+      throw new ProduceException("Spray exited with exit code " + exit + ", and was not successful");
     }
   }
 
@@ -181,5 +189,45 @@ public abstract class SprayToThorImpl extends ProduceOnlyProducerImp {
       return dfuPlus;
     }
     throw new IOException("Can't execute [" + dfuPlus.getCanonicalPath() + "]");
+  }
+
+  /**
+   * @return the parseOutput
+   */
+  public Boolean getParseOutput() {
+    return parseOutput;
+  }
+
+  /**
+   * Specify whether or not to parse the output from dfuplus.
+   * <p>
+   * It appears that dfuplus (on windows at least) may always exit with an exitcode of 0, which is not very helpful when trying
+   * to diagnose possible errors. Set this to be true (the default) to attempt to do some parsing of the console logging from
+   * dfuplus to parse errors.
+   * </p>
+   * 
+   * @param b the parseOutput to set
+   */
+  public void setParseOutput(Boolean b) {
+    this.parseOutput = b;
+  }
+
+  DfuplusOutputParser createParser() {
+    if (getParseOutput() != null ? getParseOutput().booleanValue() : true) {
+      return new SimpleOutputParser();
+    }
+    return new NoOpDfuplusOutputParser();
+  }
+
+  private class NoOpDfuplusOutputParser extends DfuplusOutputParser {
+
+    NoOpDfuplusOutputParser() {
+      super(new NullOutputStream());
+    }
+
+    @Override
+    public boolean wasSuccessful() {
+      return true;
+    }
   }
 }

@@ -14,11 +14,22 @@ import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
- * Spray multiple files into Thor straight away.
+ * Spray the contents of a directory to Thor.
  * 
  * <p>
  * Note that this producer <strong>ignores</strong> the current message contents and just sprays the contents of the directory
  * specified by {@link #getSourceDirectoryKey()} using the configured dfuplus command.
+ * </p>
+ * <p>
+ * Effectively, the program executed is going to similar to
+ * <pre>
+ * {@code 
+      dfuplus action=spray srcfile=/path/to/dir/*
+        dstcluster=mythor dstname=~zzlc:json:data overwrite=1 PREFIX=FILENAME,FILESIZE
+        server= nosplit=1 username= password=
+   }
+ * </pre>
+ * Be aware that nosplit=1 is always added, as well as the "/*".
  * </p>
  * 
  * @author lchan
