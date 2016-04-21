@@ -85,10 +85,10 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
   private String getSource(AdaptrisMessage msg) throws Exception {
     String result = "";
     if (msg.headersContainsKey(getSourceDirectoryKey())) {
-      String dir = msg.getMetadataValue(getSourceDirectoryKey());
       // Now turn it into a canonical path so that it's platform correct as
       // it appears to D:/hpcc/json-weatherdata/weather02/* doesn't work well.
-      result = new File(String.format("%1$s/*", dir)).getCanonicalPath();
+      String dir = new File(msg.getMetadataValue(getSourceDirectoryKey())).getCanonicalPath();
+      result = String.format("%1$s%2$s*", dir, File.separator);
     }
     log.trace("Source Files [{}]", result);
     return result;
