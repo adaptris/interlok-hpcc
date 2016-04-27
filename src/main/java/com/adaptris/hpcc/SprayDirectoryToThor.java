@@ -5,7 +5,9 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import java.io.File;
 
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.io.FileUtils;
 
+import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
@@ -41,6 +43,8 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
 
   private String prefix;
   private String sourceDirectoryKey;
+  @AdvancedConfig
+  private Boolean deleteSourceDirectory;
 
   @Override
   public void produce(AdaptrisMessage msg, ProduceDestination destination) throws ProduceException {
@@ -58,6 +62,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
       }
       commandLine.addArgument("nosplit=1");
       execute(commandLine);
+      postSprayCleanup(msg);
     } catch (Exception e) {
       throw ExceptionHelper.wrapProduceException(e);
     }
@@ -98,10 +103,46 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
     if (msg.headersContainsKey(getSourceDirectoryKey())) {
       // Now turn it into a canonical path so that it's platform correct as
       // it appears to D:/hpcc/json-weatherdata/weather02/* doesn't work well.
-      String dir = new File(msg.getMetadataValue(getSourceDirectoryKey())).getCanonicalPath();
+      String dir = getSourceDir(msg).getCanonicalPath();
       result = String.format("%1$s%2$s*", dir, File.separator);
     }
     log.trace("Source Files [{}]", result);
     return result;
+  }
+
+  private File getSourceDir(AdaptrisMessage msg) throws Exception {
+    File f = null;
+    if (msg.headersContainsKey(getSourceDirectoryKey())) {
+      f = new File(msg.getMetadataValue(getSourceDirectoryKey()));
+    }
+    return f;
+  }
+
+  private void postSprayCleanup(AdaptrisMessage msg) throws Exception {
+    if (deleteSourceDirectory()) {
+      File f = getSourceDir(msg);
+      log.trace("Deleting [{}]", f);
+      FileUtils.deleteQuietly(f);
+    }
+  }
+
+  /**
+   * @return the deleteSourceDirectory
+   */
+  public Boolean getDeleteSourceDirectory() {
+    return deleteSourceDirectory;
+  }
+
+  /**
+   * Whether or not to delete the source directory after uploading (if there are no errors).
+   * 
+   * @param b true to delete the source directory after processing; default if not configured is false.
+   */
+  public void setDeleteSourceDirectory(Boolean b) {
+    this.deleteSourceDirectory = b;
+  }
+
+  private boolean deleteSourceDirectory() {
+    return getDeleteSourceDirectory() != null ? getDeleteSourceDirectory().booleanValue() : false;
   }
 }
