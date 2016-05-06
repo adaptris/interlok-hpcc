@@ -7,6 +7,7 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.FileUtils;
 
+import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
@@ -16,10 +17,14 @@ import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias("spray-to-thor")
-@DisplayOrder(order = {"dfuplusCommand", "format", "maxRecordSize", "server", "cluster", "username", "password", "overwrite"})
+@DisplayOrder(
+    order = {"dfuplusCommand", "format", "maxRecordSize", "server", "cluster", "username", "password", "overwrite", "tempDir"})
 public class SprayToThor extends SprayToThorImpl {
 
   public enum FORMAT { CSV, FIXED; }
+
+  @AdvancedConfig
+  private String tempDirectory;
 
   private FORMAT format;
   private int maxRecordSize = 8192;
@@ -28,22 +33,8 @@ public class SprayToThor extends SprayToThorImpl {
   
   @Override
   public void produce(AdaptrisMessage msg, ProduceDestination destination) throws ProduceException {
-    File sourceFile;
     Object marker = new Object();
-    
-    if(msg instanceof FileBackedMessage) {
-      sourceFile = ((FileBackedMessage)msg).currentSource();
-    } else {
-      // If the message is not file-backed, write it to a temp file
-      try {
-        sourceFile = File.createTempFile("adp", ".dat");
-        tracker.track(sourceFile, marker);
-        FileUtils.writeByteArrayToFile(sourceFile, msg.getPayload());
-      } catch (IOException e) {
-        throw new ProduceException("Unable to write temporary file", e);
-      }
-    }
-    
+    File sourceFile = saveFile(msg, marker);
     try {
       CommandLine commandLine = createCommand();
       commandLine.addArgument(String.format("format=%s", getFormat().name().toLowerCase()));
@@ -70,5 +61,42 @@ public class SprayToThor extends SprayToThorImpl {
 
   public void setMaxRecordSize(int maxRecordSize) {
     this.maxRecordSize = maxRecordSize;
+  }
+
+  /**
+   * @return the tempDir
+   */
+  public String getTempDirectory() {
+    return tempDirectory;
+  }
+
+  /**
+   * If specified then messages that are not {@link FileBackedMessage} will be stored in this location prior to spray.
+   * 
+   * @param tempDir the tempDir to set; default is null which defaults to {@code java.io.tmpdir}
+   */
+  public void setTempDirectory(String tempDir) {
+    this.tempDirectory = tempDir;
+  }
+
+  private File saveFile(AdaptrisMessage msg, Object marker) throws ProduceException {
+    File result = null;
+    if (msg instanceof FileBackedMessage) {
+      result = ((FileBackedMessage) msg).currentSource();
+    } else {
+      // If the message is not file-backed, write it to a temp file
+      try {
+        if (getTempDirectory() != null) {
+          result = File.createTempFile("adp", ".dat", new File(getTempDirectory()));
+        } else {
+          result = File.createTempFile("adp", ".dat");
+        }
+        tracker.track(result, marker);
+        FileUtils.writeByteArrayToFile(result, msg.getPayload());
+      } catch (IOException e) {
+        throw new ProduceException("Unable to write temporary file", e);
+      }
+    }
+    return result;
   }
 }
