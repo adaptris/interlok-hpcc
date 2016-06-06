@@ -16,9 +16,22 @@ import com.adaptris.core.lms.FileBackedMessage;
 import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
+/**
+ * Spray the contents of the current message into Thor.
+ * 
+ * <p>
+ * The adapter needs a running {@code dfuplus action=dafilesrv} instance which can be connected to from
+ * Thor running on the machine where the adapter is hosted.
+ * </p>
+ * 
+ * @author lchan
+ * @config spray-to-thor
+ *
+ */
 @XStreamAlias("spray-to-thor")
 @DisplayOrder(
-    order = {"dfuplusCommand", "format", "maxRecordSize", "server", "cluster", "username", "password", "overwrite", "tempDir"})
+    order = {"dfuplusCommand", "format", "maxRecordSize", "server", "cluster", "username", "password", "overwrite",
+        "tempDirectory"})
 public class SprayToThor extends SprayToThorImpl {
 
   public enum FORMAT { CSV, FIXED; }

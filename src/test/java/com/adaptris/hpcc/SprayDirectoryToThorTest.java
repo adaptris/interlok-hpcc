@@ -14,7 +14,7 @@ public class SprayDirectoryToThorTest extends ProducerCase {
   protected StandaloneProducer retrieveObjectForSampleConfig() {
     SprayDirectoryToThor t = new SprayDirectoryToThor();
     t.setCluster("mythor");
-    t.setServer("http://localhost:8010");
+    t.setServer("http://192.168.56.101:8010");
     t.setDfuplusCommand("/opt/path/to/hpcc/client/tools/bin/dfuplus");
     t.setDestination(new ConfiguredProduceDestination("~test::test"));
     t.setOverwrite(true);

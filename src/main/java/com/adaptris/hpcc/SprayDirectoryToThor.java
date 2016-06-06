@@ -33,8 +33,13 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * </pre>
  * Be aware that nosplit=1 is always added, as well as the "/*".
  * </p>
+ * <p>
+ * The adapter also needs a running {@code dfuplus action=dafilesrv} instance which can be connected to from
+ * Thor running on the machine where the adapter is hosted.
+ * </p>
  * 
  * @author lchan
+ * @config spray-directory-to-thor
  *
  */
 @XStreamAlias("spray-directory-to-thor")
