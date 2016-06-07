@@ -106,7 +106,7 @@ public class DesprayFromThor extends DfuPlusWrapper {
 
   @Override
   public final AdaptrisMessage request(AdaptrisMessage msg) throws ProduceException {
-    return request(msg, getDestination(), timeoutMs());
+    return request(msg, getDestination(), monitorIntervalMs());
   }
 
   @Override
@@ -116,12 +116,12 @@ public class DesprayFromThor extends DfuPlusWrapper {
 
   @Override
   public final AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination) throws ProduceException {
-    return request(msg, destination, timeoutMs());
+    return request(msg, destination, monitorIntervalMs());
   }
 
   @Override
   public void produce(AdaptrisMessage msg, ProduceDestination dest) throws ProduceException {
-    request(msg, dest, timeoutMs());
+    request(msg, dest, monitorIntervalMs());
   }
 
   private File createAndTrackFile(Object marker) throws IOException {
@@ -158,6 +158,7 @@ public class DesprayFromThor extends DfuPlusWrapper {
       commandLine.addArgument(String.format("dstfile=%s", destFile.getCanonicalPath()));
       commandLine.addArgument(String.format("dstip=%s", destIpAddress()));
       commandLine.addArgument("overwrite=1");
+      commandLine.addArgument("nowait=1");
       execute(commandLine);
       fileToMessage(destFile, msg);
     } catch (Exception e) {

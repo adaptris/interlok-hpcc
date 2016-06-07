@@ -1,13 +1,19 @@
 package com.adaptris.hpcc;
 
-import java.io.FilterOutputStream;
-import java.io.OutputStream;
+import org.apache.commons.exec.LogOutputStream;
 
-public abstract class DfuplusOutputParser extends FilterOutputStream {
+public abstract class DfuplusOutputParser extends LogOutputStream {
 
-  public DfuplusOutputParser(OutputStream out) {
-    super(out);
+  public enum JobStatus {
+    SUCCESS,
+    FAILURE,
+    NOT_COMPLETE,
+  }
+  public DfuplusOutputParser() {
+    super();
   }
 
-  protected abstract boolean wasSuccessful();
+  protected abstract JobStatus getJobStatus();
+
+  protected abstract String getWorkUnitId();
 }

@@ -93,6 +93,7 @@ public abstract class SprayToThorImpl extends DfuPlusWrapper {
     cmdLine.addArgument("action=spray");
     cmdLine.addArgument(String.format("dstcluster=%s", getCluster()));
     cmdLine.addArgument(String.format("overwrite=%d", overwrite() ? 1 : 0));
+    cmdLine.addArgument("nowait=1");
     return cmdLine;
   }
 
