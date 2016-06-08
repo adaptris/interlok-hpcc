@@ -30,7 +30,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  */
 @XStreamAlias("spray-to-thor")
 @DisplayOrder(
-    order = {"dfuplusCommand", "format", "maxRecordSize", "server", "cluster", "username", "password", "overwrite",
+    order = {"dfuplusCommand", "server", "cluster", "username", "password", "format", "maxRecordSize", "overwrite",
         "tempDirectory"})
 public class SprayToThor extends SprayToThorImpl {
 

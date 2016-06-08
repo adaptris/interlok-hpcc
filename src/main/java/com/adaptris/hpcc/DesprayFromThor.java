@@ -36,7 +36,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * @config despray-from-thor
  */
 @XStreamAlias("despray-from-thor")
-@DisplayOrder(order = {"dfuplusCommand", "server", "destIpAddress", "username", "password", "tempDirectory"})
+@DisplayOrder(order = {"dfuplusCommand", "server", "username", "password", "destIpAddress", "tempDirectory"})
 public class DesprayFromThor extends DfuPlusWrapper {
 
   @AdvancedConfig

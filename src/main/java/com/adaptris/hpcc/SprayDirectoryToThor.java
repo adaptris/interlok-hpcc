@@ -43,7 +43,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  *
  */
 @XStreamAlias("spray-directory-to-thor")
-@DisplayOrder(order = {"dfuplusCommand", "sourceDirectoryKey", "server", "cluster", "username", "password", "overwrite"})
+@DisplayOrder(order = {"dfuplusCommand", "server", "cluster", "username", "password", "sourceDirectoryKey", "overwrite"})
 public class SprayDirectoryToThor extends SprayToThorImpl {
 
   private String prefix;
