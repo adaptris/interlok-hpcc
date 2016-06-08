@@ -88,8 +88,8 @@ public abstract class SprayToThorImpl extends DfuPlusWrapper {
     return getOverwrite() != null ? getOverwrite().booleanValue() : false;
   }
 
-  protected CommandLine createCommand() throws PasswordException, IOException {
-    CommandLine cmdLine = super.createCommand();
+  protected CommandLine createSprayCommand() throws PasswordException, IOException {
+    CommandLine cmdLine = retrieveConnection(DfuplusConnection.class).createCommand();
     cmdLine.addArgument("action=spray");
     cmdLine.addArgument(String.format("dstcluster=%s", getCluster()));
     cmdLine.addArgument(String.format("overwrite=%d", overwrite() ? 1 : 0));

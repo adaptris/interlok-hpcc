@@ -11,11 +11,15 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.IOUtils;
 
+import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
+import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.core.AdaptrisMessageProducerImp;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
+import com.adaptris.core.StandaloneRequestor;
 import com.adaptris.core.lms.FileBackedMessage;
 import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -24,19 +28,23 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * Despray a file from Thor.
  * 
  * <p>
- * Although from a naming perspective it makes no sense to use a 'ProduceDestination' when you are consuming data;
- * {@link ProduceDestination} allows us to derive the destination from the message so that we can derive the logical-filename
- * from the message as required.
+ * Note that although this is an implementation of {@link AdaptrisMessageProducerImp} the {@code AdaptrisMessageProducer#produce()}
+ * methods will throw a {@link UnsupportedOperationException}. It should be used as part of a {@link StandaloneRequestor} where the
+ * {@link ProduceDestination} returns the logical filename of the file that you wish to retrieve.
  * </p>
  * <p>
- * The adapter also needs a running {@code dfuplus action=dafilesrv} instance which can be connected to from
- * Thor running on the machine where the adapter is hosted.
+ * The adapter also needs a running {@code dfuplus action=dafilesrv} instance on the machine where the adapter is hosted. Thor will
+ * connect to this instance to deliver the files.
  * </p>
  * 
  * @config despray-from-thor
  */
 @XStreamAlias("despray-from-thor")
-@DisplayOrder(order = {"dfuplusCommand", "server", "username", "password", "destIpAddress", "tempDirectory"})
+@AdapterComponent
+@ComponentProfile(summary = "Despray a logical file from HPCC into the current message via dfuplus",
+    tag = "producer,hpcc,dfuplus,thor",
+    recommended = {DfuplusConnection.class})
+@DisplayOrder(order = {"destIpAddress", "tempDirectory"})
 public class DesprayFromThor extends DfuPlusWrapper {
 
   @AdvancedConfig
@@ -59,7 +67,7 @@ public class DesprayFromThor extends DfuPlusWrapper {
   }
 
   /**
-   * If specified then messages that are not {@link FileBackedMessage} will be stored in this location prior to spray.
+   * The output file for dfuplus when despraying.
    * 
    * @param tempDir the tempDir to set; default is null which defaults to {@code java.io.tmpdir}
    */
@@ -87,8 +95,8 @@ public class DesprayFromThor extends DfuPlusWrapper {
    * If the destination IP address is not specified, then the default dfuplus action is to despray into the configured landing
    * zone (which may not be where the adapter is hosted); ultimately we want the desprayed file to be accessible to the adapter, so
    * if no ip address is configured then {@link InetAddress#getLocalHost()} is used; which may be incorrect in
-   * multi-homed systems.The adapter also needs a running {@code dfuplus action=dafilesrv} instance which can be connected to from
-   * Thor running on the machine where the adapter is hosted.
+   * multi-homed systems. The adapter will need a running {@code dfuplus action=dafilesrv} instance on the machine where the adapter
+   * is hosted. Thor will connect to this instance to deliver the files.
    * </p>
    * 
    * @param s the destination IP Address to (the dstip argument); if not specified then
@@ -101,7 +109,12 @@ public class DesprayFromThor extends DfuPlusWrapper {
 
   @Override
   public final void produce(AdaptrisMessage msg) throws ProduceException {
-    produce(msg, getDestination());
+    throw new UnsupportedOperationException("Use request()");
+  }
+
+  @Override
+  public void produce(AdaptrisMessage msg, ProduceDestination dest) throws ProduceException {
+    throw new UnsupportedOperationException("Use request()");
   }
 
   @Override
@@ -117,11 +130,6 @@ public class DesprayFromThor extends DfuPlusWrapper {
   @Override
   public final AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination) throws ProduceException {
     return request(msg, destination, monitorIntervalMs());
-  }
-
-  @Override
-  public void produce(AdaptrisMessage msg, ProduceDestination dest) throws ProduceException {
-    request(msg, dest, monitorIntervalMs());
   }
 
   private File createAndTrackFile(Object marker) throws IOException {
@@ -152,7 +160,7 @@ public class DesprayFromThor extends DfuPlusWrapper {
   public AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination, long timeoutMs) throws ProduceException {
     try {
       File destFile = createAndTrackFile(msg);
-      CommandLine commandLine = createCommand();
+      CommandLine commandLine = retrieveConnection(DfuplusConnection.class).createCommand();
       commandLine.addArgument("action=despray");
       commandLine.addArgument(String.format("srcname=%s", destination.getDestination(msg)));
       commandLine.addArgument(String.format("dstfile=%s", destFile.getCanonicalPath()));

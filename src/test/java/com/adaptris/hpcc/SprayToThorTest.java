@@ -12,16 +12,18 @@ public class SprayToThorTest extends ProducerCase {
 
   @Override
   protected StandaloneProducer retrieveObjectForSampleConfig() {
-    SprayToThor t = new SprayToThor();
-    t.setCluster("mythor");
-    t.setServer("http://192.168.56.101:8010");
-    t.setDfuplusCommand("/opt/path/to/hpcc/client/tools/bin/dfuplus");
-    t.setDestination(new ConfiguredProduceDestination("~test::test"));
-    t.setFormat(SprayToThor.FORMAT.CSV);
-    t.setOverwrite(true);
-    t.setUsername("myuser");
-    t.setPassword("myPassword");
-    return new StandaloneProducer(t);
+    DfuplusConnection c = new DfuplusConnection();
+    c.setServer("http://192.168.56.101:8010");
+    c.setDfuplusCommand("/opt/path/to/hpcc/client/tools/bin/dfuplus");
+    c.setUsername("myuser");
+    c.setPassword("myPassword");
+
+    SprayToThor p = new SprayToThor();
+    p.setCluster("mythor");
+    p.setDestination(new ConfiguredProduceDestination("~test::test"));
+    p.setFormat(SprayToThor.FORMAT.CSV);
+    p.setOverwrite(true);
+    return new StandaloneProducer(c, p);
   }
 
 

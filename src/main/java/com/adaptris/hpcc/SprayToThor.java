@@ -7,7 +7,9 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.FileUtils;
 
+import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
+import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
@@ -20,8 +22,8 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * Spray the contents of the current message into Thor.
  * 
  * <p>
- * The adapter needs a running {@code dfuplus action=dafilesrv} instance which can be connected to from
- * Thor running on the machine where the adapter is hosted.
+ * The adapter also needs a running {@code dfuplus action=dafilesrv} instance on the machine where the adapter is hosted. Thor will
+ * connect to this instance for file delivery.
  * </p>
  * 
  * @author lchan
@@ -29,9 +31,10 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  *
  */
 @XStreamAlias("spray-to-thor")
-@DisplayOrder(
-    order = {"dfuplusCommand", "server", "cluster", "username", "password", "format", "maxRecordSize", "overwrite",
-        "tempDirectory"})
+@AdapterComponent
+@ComponentProfile(summary = "Spray the current message into HPCC via dfuplus", tag = "producer,hpcc,dfuplus",
+    recommended = {DfuplusConnection.class})
+@DisplayOrder(order = {"cluster", "format", "maxRecordSize", "overwrite", "tempDirectory"})
 public class SprayToThor extends SprayToThorImpl {
 
   public enum FORMAT { CSV, FIXED; }
@@ -49,7 +52,7 @@ public class SprayToThor extends SprayToThorImpl {
     Object marker = new Object();
     File sourceFile = saveFile(msg, marker);
     try {
-      CommandLine commandLine = createCommand();
+      CommandLine commandLine = createSprayCommand();
       commandLine.addArgument(String.format("format=%s", getFormat().name().toLowerCase()));
       commandLine.addArgument(String.format("maxrecordsize=%d", getMaxRecordSize()));
       commandLine.addArgument(String.format("srcfile=%s", sourceFile.getCanonicalPath()));

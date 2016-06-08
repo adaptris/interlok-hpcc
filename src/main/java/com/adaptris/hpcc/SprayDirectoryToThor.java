@@ -7,7 +7,9 @@ import java.io.File;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 
+import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
+import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
@@ -34,8 +36,8 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * Be aware that nosplit=1 is always added, as well as the "/*".
  * </p>
  * <p>
- * The adapter also needs a running {@code dfuplus action=dafilesrv} instance which can be connected to from
- * Thor running on the machine where the adapter is hosted.
+ * The adapter also needs a running {@code dfuplus action=dafilesrv} instance on the machine where the adapter is hosted. Thor will
+ * connect to this instance for file delivery.
  * </p>
  * 
  * @author lchan
@@ -43,7 +45,10 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  *
  */
 @XStreamAlias("spray-directory-to-thor")
-@DisplayOrder(order = {"dfuplusCommand", "server", "cluster", "username", "password", "sourceDirectoryKey", "overwrite"})
+@AdapterComponent
+@ComponentProfile(summary = "Spray a directory into HPCC via dfuplus", tag = "producer,hpcc,dfuplus",
+    recommended = {DfuplusConnection.class})
+@DisplayOrder(order = {"cluster", "sourceDirectoryKey", "overwrite"})
 public class SprayDirectoryToThor extends SprayToThorImpl {
 
   private String prefix;
@@ -59,7 +64,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
     // dstcluster=mythor dstname=zzlc::json::historical_weather_04 overwrite=1 PREFIX=FILENAME,FILESIZE
     // server= nosplit=1 username= password=
     try {
-      CommandLine commandLine = createCommand();
+      CommandLine commandLine = createSprayCommand();
       commandLine.addArgument(String.format("srcfile=%s", getSource(msg)));
       commandLine.addArgument(String.format("dstname=%s", destination.getDestination(msg)));
       if (!isBlank(getPrefix())) {

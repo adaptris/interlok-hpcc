@@ -2,7 +2,6 @@ package com.adaptris.hpcc;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
@@ -16,18 +15,14 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
-import org.hibernate.validator.constraints.NotBlank;
 
 import com.adaptris.annotation.AdvancedConfig;
-import com.adaptris.annotation.InputFieldHint;
 import com.adaptris.core.AdaptrisMessageProducerImp;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.ProduceException;
-import com.adaptris.core.util.Args;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.hpcc.DfuplusOutputParser.JobStatus;
 import com.adaptris.security.exc.PasswordException;
-import com.adaptris.security.password.Password;
 import com.adaptris.util.TimeInterval;
 
 /**
@@ -44,13 +39,6 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
   @Valid
   @AdvancedConfig
   private TimeInterval monitorInterval;
-  @NotBlank
-  private String dfuplusCommand;
-  @NotBlank
-  private String server;
-  private String username;
-  @InputFieldHint(style = "PASSWORD")
-  private String password;
 
   private transient Calendar nextLogEvent = null;
 
@@ -83,37 +71,6 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     // NOP
   }
 
-  public String getDfuplusCommand() {
-    return dfuplusCommand;
-  }
-
-  public void setDfuplusCommand(String s) {
-    this.dfuplusCommand = Args.notBlank(s, "dfuplusCommand");
-  }
-
-  public String getServer() {
-    return server;
-  }
-
-  public void setServer(String server) {
-    this.server = Args.notBlank(server, "server");
-  }
-
-  public String getUsername() {
-    return username;
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-  }
 
   /**
    * @return the timeout
@@ -144,7 +101,7 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     // password=%s overwrite=%d";
     DfuplusOutputParser stdout = new JobSubmissionParser();
     try {
-      doExecute(cmdLine, stdout);
+      executeInternal(cmdLine, stdout);
       JobStatus status = stdout.getJobStatus();
       long monitorIntervalMs = monitorIntervalMs();
       while (status == JobStatus.NOT_COMPLETE) {
@@ -163,7 +120,7 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
   }
 
 
-  private void doExecute(CommandLine cmdLine, OutputStream stdout) throws ProduceException, AbortJobException {
+  private void executeInternal(CommandLine cmdLine, OutputStream stdout) throws ProduceException, AbortJobException {
     int exit = -1;
     ExecuteWatchdog watchdog = new ExecuteWatchdog(EXEC_TIMEOUT_INTERVAL.toMilliseconds());
     try (OutputStream out = stdout) {
@@ -186,7 +143,7 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     DfuplusOutputParser stdout = new JobStatusParser(wuid);
     CommandLine cmdLine = createQuery(wuid);
     cmdLine.addArgument("action=status");
-    doExecute(cmdLine, stdout);
+    executeInternal(cmdLine, stdout);
     return stdout.getJobStatus();
   }
 
@@ -198,38 +155,17 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     try {
       CommandLine cmdLine = createQuery(wuid);
       cmdLine.addArgument("action=abort");
-      doExecute(cmdLine, new NoOpDfuplusOutputParser());
+      executeInternal(cmdLine, new NoOpDfuplusOutputParser());
     } catch (Exception ignored) {
     }
   }
 
-  protected CommandLine createCommand() throws PasswordException, IOException {
-    File dfuPlus = validateCmd(getDfuplusCommand());
-    CommandLine cmdLine = new CommandLine(dfuPlus.getCanonicalPath());
-    cmdLine.addArgument(String.format("server=%s", getServer()));
-    if (!isBlank(getUsername())) {
-      cmdLine.addArgument(String.format("username=%s", getUsername()));
-    }
-    if (!isBlank(getPassword())) {
-      cmdLine.addArgument(String.format("password=%s", Password.decode(getPassword())));
-    }
-    return cmdLine;
-  }
-
   private CommandLine createQuery(String wuid) throws PasswordException, IOException {
-    CommandLine cmdLine = createCommand();
+    CommandLine cmdLine = retrieveConnection(DfuplusConnection.class).createCommand();
     if (!isBlank(wuid)) {
       cmdLine.addArgument(String.format("wuid=%s", wuid));
     }
     return cmdLine;
-  }
-
-  private File validateCmd(String cmd) throws IOException {
-    File dfuPlus = new File(cmd);
-    if (dfuPlus.exists() && dfuPlus.isFile() && dfuPlus.canExecute()) {
-      return dfuPlus;
-    }
-    throw new IOException("Can't execute [" + dfuPlus.getCanonicalPath() + "]");
   }
 
 

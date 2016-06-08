@@ -12,17 +12,19 @@ public class SprayDirectoryToThorTest extends ProducerCase {
 
   @Override
   protected StandaloneProducer retrieveObjectForSampleConfig() {
-    SprayDirectoryToThor t = new SprayDirectoryToThor();
-    t.setCluster("mythor");
-    t.setServer("http://192.168.56.101:8010");
-    t.setDfuplusCommand("/opt/path/to/hpcc/client/tools/bin/dfuplus");
-    t.setDestination(new ConfiguredProduceDestination("~test::test"));
-    t.setOverwrite(true);
-    t.setUsername("myuser");
-    t.setPassword("myPassword");
-    t.setPrefix("FILENAME,FILESIZE");
-    t.setSourceDirectoryKey("metadataKeyContainingDirectory");
-    return new StandaloneProducer(t);
+    DfuplusConnection c = new DfuplusConnection();
+    c.setServer("http://192.168.56.101:8010");
+    c.setDfuplusCommand("/opt/path/to/hpcc/client/tools/bin/dfuplus");
+    c.setUsername("myuser");
+    c.setPassword("myPassword");
+
+    SprayDirectoryToThor p = new SprayDirectoryToThor();
+    p.setCluster("mythor");
+    p.setDestination(new ConfiguredProduceDestination("~test::test"));
+    p.setOverwrite(true);
+    p.setPrefix("FILENAME,FILESIZE");
+    p.setSourceDirectoryKey("metadataKeyContainingDirectory");
+    return new StandaloneProducer(c, p);
   }
 
 

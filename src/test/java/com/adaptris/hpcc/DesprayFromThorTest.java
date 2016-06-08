@@ -12,14 +12,16 @@ public class DesprayFromThorTest extends ProducerCase {
 
   @Override
   protected StandaloneRequestor retrieveObjectForSampleConfig() {
-    DesprayFromThor t = new DesprayFromThor();
-    t.setServer("http://192.168.56.101:8010");
-    t.setDfuplusCommand("/opt/path/to/hpcc/client/tools/bin/dfuplus");
-    t.setDestination(new ConfiguredProduceDestination("test::test"));
-    t.setUsername("myuser");
-    t.setPassword("myPassword");
-    t.setDestIpAddress("192.168.56.1");
-    return new StandaloneRequestor(t);
+    DfuplusConnection c = new DfuplusConnection();
+    c.setServer("http://192.168.56.101:8010");
+    c.setDfuplusCommand("/opt/path/to/hpcc/client/tools/bin/dfuplus");
+    c.setUsername("myuser");
+    c.setPassword("myPassword");
+
+    DesprayFromThor p = new DesprayFromThor();
+    p.setDestination(new ConfiguredProduceDestination("test::test"));
+    p.setDestIpAddress("192.168.56.1");
+    return new StandaloneRequestor(c, p);
   }
 
 
