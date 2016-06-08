@@ -105,8 +105,10 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
       JobStatus status = stdout.getJobStatus();
       long monitorIntervalMs = monitorIntervalMs();
       while (status == JobStatus.NOT_COMPLETE) {
-        TimeUnit.MILLISECONDS.sleep(ThreadLocalRandom.current().nextLong(monitorIntervalMs));
         status = requestStatus(stdout.getWorkUnitId());
+        if (status == JobStatus.NOT_COMPLETE) {
+          TimeUnit.MILLISECONDS.sleep(ThreadLocalRandom.current().nextLong(monitorIntervalMs));
+        }
         timedLogger("WUID [{}]; status=[{}]", stdout.getWorkUnitId(), status.name());
       }
       if (status == JobStatus.FAILURE) {

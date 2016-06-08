@@ -57,6 +57,7 @@ public class SprayToThor extends SprayToThorImpl {
       commandLine.addArgument(String.format("maxrecordsize=%d", getMaxRecordSize()));
       commandLine.addArgument(String.format("srcfile=%s", sourceFile.getCanonicalPath()));
       commandLine.addArgument(String.format("dstname=%s", destination.getDestination(msg)));
+      log.trace("Executing {}", commandLine);
       execute(commandLine);
     } catch (Exception e) {
       throw ExceptionHelper.wrapProduceException(e);

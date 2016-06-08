@@ -71,6 +71,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
         commandLine.addArgument(String.format("PREFIX=%s", getPrefix()));
       }
       commandLine.addArgument("nosplit=1");
+      log.trace("Executing {}", commandLine);
       execute(commandLine);
       postSprayCleanup(msg);
     } catch (Exception e) {

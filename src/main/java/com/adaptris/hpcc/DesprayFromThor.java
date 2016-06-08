@@ -167,6 +167,7 @@ public class DesprayFromThor extends DfuPlusWrapper {
       commandLine.addArgument(String.format("dstip=%s", destIpAddress()));
       commandLine.addArgument("overwrite=1");
       commandLine.addArgument("nowait=1");
+      log.trace("Executing {}", commandLine);
       execute(commandLine);
       fileToMessage(destFile, msg);
     } catch (Exception e) {
