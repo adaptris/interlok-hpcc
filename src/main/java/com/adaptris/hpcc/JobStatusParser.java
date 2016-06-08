@@ -1,6 +1,5 @@
 package com.adaptris.hpcc;
 
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +45,6 @@ public class JobStatusParser extends DfuplusOutputParser {
   private transient JobStatus jobStatus = null;
   private transient JobState jobState = null;
 
-  private transient Calendar nextLogEvent = null;
   private transient Map<String, JobState> workUnitMap = null;
 
   public JobStatusParser(String wuid) {
@@ -99,22 +97,6 @@ public class JobStatusParser extends DfuplusOutputParser {
     }
     if (oldStatus != jobStatus) {
       log.trace("Status change for WUID [{}], now [{}({})]", workUnit, jobStatus.name(), jobState.name());
-    } else {
-      logStatus("Status for WUID [{}] is [{}({})]", workUnit, jobStatus.name(), jobState.name());
-    }
-  }
-
-
-  private void logStatus(String text, Object... args) {
-    if (nextLogEvent == null) {
-      nextLogEvent = Calendar.getInstance();
-      nextLogEvent.add(Calendar.MINUTE, -1);
-    }
-    Calendar now = Calendar.getInstance();
-    if (now.getTime().after(nextLogEvent.getTime())) {
-      log.trace(text, args);
-      nextLogEvent.setTime(now.getTime());
-      nextLogEvent.add(Calendar.MINUTE, 5);
     }
   }
 }

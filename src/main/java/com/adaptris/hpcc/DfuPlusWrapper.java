@@ -5,6 +5,8 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import javax.validation.Valid;
@@ -50,8 +52,9 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
   @InputFieldHint(style = "PASSWORD")
   private String password;
 
-  public DfuPlusWrapper() {
+  private transient Calendar nextLogEvent = null;
 
+  public DfuPlusWrapper() {
   }
 
 
@@ -143,9 +146,11 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     try {
       doExecute(cmdLine, stdout);
       JobStatus status = stdout.getJobStatus();
+      long monitorIntervalMs = monitorIntervalMs();
       while (status == JobStatus.NOT_COMPLETE) {
-        TimeUnit.MILLISECONDS.sleep(monitorIntervalMs());
+        TimeUnit.MILLISECONDS.sleep(ThreadLocalRandom.current().nextLong(monitorIntervalMs));
         status = requestStatus(stdout.getWorkUnitId());
+        timedLogger("WUID [{}] is [{}]", stdout.getWorkUnitId(), status.name());
       }
       if (status == JobStatus.FAILURE) {
         throw new ProduceException("Job " + stdout.getWorkUnitId() + " was not successful");
@@ -225,6 +230,20 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
       return dfuPlus;
     }
     throw new IOException("Can't execute [" + dfuPlus.getCanonicalPath() + "]");
+  }
+
+
+  private void timedLogger(String text, Object... args) {
+    if (nextLogEvent == null) {
+      nextLogEvent = Calendar.getInstance();
+      nextLogEvent.add(Calendar.MINUTE, -1);
+    }
+    Calendar now = Calendar.getInstance();
+    if (now.getTime().after(nextLogEvent.getTime())) {
+      log.trace(text, args);
+      nextLogEvent.setTime(now.getTime());
+      nextLogEvent.add(Calendar.MINUTE, 5);
+    }
   }
 
   private class NoOpDfuplusOutputParser extends DfuplusOutputParser {
