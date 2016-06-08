@@ -42,8 +42,7 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
 
   private transient Calendar nextLogEvent = null;
 
-  public DfuPlusWrapper() {
-  }
+  public DfuPlusWrapper() {}
 
 
   @Override
@@ -104,10 +103,12 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
       executeInternal(cmdLine, stdout);
       JobStatus status = stdout.getJobStatus();
       long monitorIntervalMs = monitorIntervalMs();
+      long sleepyTime = calculateWait(0);
       while (status == JobStatus.NOT_COMPLETE) {
         status = requestStatus(stdout.getWorkUnitId());
         if (status == JobStatus.NOT_COMPLETE) {
-          TimeUnit.MILLISECONDS.sleep(ThreadLocalRandom.current().nextLong(monitorIntervalMs));
+          TimeUnit.MILLISECONDS.sleep(sleepyTime);
+          sleepyTime = calculateWait(sleepyTime);
         }
         timedLogger("WUID [{}]; status=[{}]", stdout.getWorkUnitId(), status.name());
       }
@@ -140,6 +141,16 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     }
   }
 
+  private long calculateWait(long current) {
+    long result = TimeUnit.SECONDS.toMillis(1);
+    if (current > 0) {
+      result = current * 2;
+      if (result > monitorIntervalMs()) {
+        result = monitorIntervalMs();
+      }
+    }
+    return Math.max(ThreadLocalRandom.current().nextLong(result), current);
+  }
 
   private JobStatus requestStatus(String wuid) throws ProduceException, AbortJobException, PasswordException, IOException {
     DfuplusOutputParser stdout = new JobStatusParser(wuid);
