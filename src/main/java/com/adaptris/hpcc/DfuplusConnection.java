@@ -9,6 +9,7 @@ import org.apache.commons.exec.CommandLine;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.adaptris.annotation.AdapterComponent;
+import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.annotation.InputFieldHint;
@@ -46,6 +47,14 @@ public class DfuplusConnection extends NoOpConnection {
   @InputFieldHint(style = "PASSWORD")
   private String password;
 
+  @AdvancedConfig
+  private Integer transferBufferSize;
+  @AdvancedConfig
+  private Integer throttle;
+  @AdvancedConfig
+  private Boolean replicate;
+  @AdvancedConfig
+  private Boolean noRecover;
 
   public DfuplusConnection() {
     super();
@@ -93,6 +102,19 @@ public class DfuplusConnection extends NoOpConnection {
     if (!isBlank(getPassword())) {
       cmdLine.addArgument(String.format("password=%s", Password.decode(getPassword())));
     }
+    if (getReplicate() != null) {
+      cmdLine.addArgument(String.format("replicate=%d", getReplicate().booleanValue() ? 1 : 0));
+    }
+    if (getNoRecover() != null) {
+      cmdLine.addArgument(String.format("norecover=%d", getNoRecover().booleanValue() ? 1 : 0));
+    }
+    if (getThrottle() != null) {
+      cmdLine.addArgument(String.format("throttle=%d", getThrottle().intValue()));
+
+    }
+    if (getTransferBufferSize() != null) {
+      cmdLine.addArgument(String.format("transferbuffersize=%d", getTransferBufferSize().intValue()));
+    }
     return cmdLine;
   }
 
@@ -102,6 +124,71 @@ public class DfuplusConnection extends NoOpConnection {
       return dfuPlus;
     }
     throw new IOException("Can't execute [" + dfuPlus.getCanonicalPath() + "]");
+  }
+
+  /**
+   * @return the transferBufferSize
+   */
+  public Integer getTransferBufferSize() {
+    return transferBufferSize;
+  }
+
+  /**
+   * Maps to the {@code transferbuffersize} argument.
+   * 
+   * @param i the transferBufferSize to set; if not specified, will not be passed as an argument.
+   */
+  public void setTransferBufferSize(Integer i) {
+    this.transferBufferSize = i;
+  }
+
+  /**
+   * @return the throttle
+   */
+  public Integer getThrottle() {
+    return throttle;
+  }
+
+  /**
+   * Maps to the {@code throttle} argument.
+   * 
+   * @param i the throttle to set; if not specified, will not be passed as an argument.
+   */
+  public void setThrottle(Integer i) {
+    this.throttle = i;
+  }
+
+  /**
+   * 
+   * @return the replicate
+   */
+  public Boolean getReplicate() {
+    return replicate;
+  }
+
+  /**
+   * Maps to the {@code replicate} argument.
+   * 
+   * @param b true/false, if not specified, will not be passed as an argument.
+   */
+  public void setReplicate(Boolean b) {
+    this.replicate = b;
+  }
+
+  /**
+   * @return the norecover flag.
+   */
+  public Boolean getNoRecover() {
+    return noRecover;
+  }
+
+  /**
+   * Maps to the {@code norecover} argument.
+   * 
+   * @param b true/false, if not specified, will not be passed as an argument.
+   */
+  public void setNoRecover(Boolean b) {
+    this.noRecover = b;
   }
 
 
