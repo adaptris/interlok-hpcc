@@ -1,5 +1,7 @@
 package com.adaptris.hpcc;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,8 +49,11 @@ public class JobStatusParser extends DfuplusOutputParser {
 
   private transient Map<String, JobState> workUnitMap = null;
 
-  public JobStatusParser(String wuid) {
+  public JobStatusParser(String wuid) throws AbortJobException {
     super();
+    if (isBlank(wuid)) {
+      throw new AbortJobException("WUID is null");
+    }
     workUnit = wuid;
     jobStatus = JobStatus.NOT_COMPLETE;
     jobState = JobState.unknown;

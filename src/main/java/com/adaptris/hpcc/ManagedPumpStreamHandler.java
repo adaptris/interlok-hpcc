@@ -12,20 +12,8 @@ class ManagedPumpStreamHandler extends PumpStreamHandler {
 
   private static final ManagedThreadFactory MTF = new ManagedThreadFactory();
 
-  public ManagedPumpStreamHandler() {
-      this(System.out, System.err);
-  }
-
   public ManagedPumpStreamHandler(final OutputStream outAndErr) {
-      this(outAndErr, outAndErr);
-  }
-
-  public ManagedPumpStreamHandler(final OutputStream out, final OutputStream err) {
-      this(out, err, null);
-  }
-
-  public ManagedPumpStreamHandler(final OutputStream out, final OutputStream err, final InputStream input) {
-    super(out, err, input);
+    super(outAndErr, outAndErr);
   }
 
   protected Thread createPump(final InputStream is, final OutputStream os, final boolean closeWhenExhausted) {

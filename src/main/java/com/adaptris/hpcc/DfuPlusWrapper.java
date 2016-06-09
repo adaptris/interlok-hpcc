@@ -117,6 +117,7 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
       }
     } catch (AbortJobException | InterruptedException e) {
       abortJob(stdout.getWorkUnitId());
+      throw ExceptionHelper.wrapProduceException(e);
     } catch (PasswordException | IOException e) {
       throw ExceptionHelper.wrapProduceException(e);
     }
@@ -137,7 +138,7 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
       throw ExceptionHelper.wrapProduceException(e);
     }
     if (watchdog.killedProcess() || exit != 0) {
-      throw new AbortJobException();
+      throw new AbortJobException("Job killed due to timeout/ExitCode != 0");
     }
   }
 
@@ -213,9 +214,5 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
 
     @Override
     protected void processLine(String line, int logLevel) {}
-  }
-
-  private class AbortJobException extends Exception {
-    public AbortJobException() {}
   }
 }
