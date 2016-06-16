@@ -102,7 +102,6 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     try {
       executeInternal(cmdLine, stdout);
       JobStatus status = stdout.getJobStatus();
-      long monitorIntervalMs = monitorIntervalMs();
       long sleepyTime = calculateWait(0);
       while (status == JobStatus.NOT_COMPLETE) {
         status = requestStatus(stdout.getWorkUnitId());
@@ -124,7 +123,7 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
   }
 
 
-  private void executeInternal(CommandLine cmdLine, OutputStream stdout) throws ProduceException, AbortJobException {
+  protected void executeInternal(CommandLine cmdLine, OutputStream stdout) throws ProduceException, AbortJobException {
     int exit = -1;
     ExecuteWatchdog watchdog = new ExecuteWatchdog(EXEC_TIMEOUT_INTERVAL.toMilliseconds());
     try (OutputStream out = stdout) {
@@ -142,7 +141,7 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     }
   }
 
-  private long calculateWait(long current) {
+  protected long calculateWait(long current) {
     long result = TimeUnit.SECONDS.toMillis(1);
     if (current > 0) {
       result = current * 2;
