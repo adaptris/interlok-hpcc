@@ -1,7 +1,8 @@
 package com.adaptris.hpcc;
 
-import org.apache.oro.text.GlobCompiler;
-import org.apache.oro.text.regex.Pattern;
+import java.io.PrintWriter;
+
+import org.eclipse.jetty.util.log.Log;
 
 // C:\adaptris\HPCCSystems\5.4.2\clienttools\bin>dfuplus action=list server=http://192.168.56.101:8011 name="zzlc*"
 // List zzlc*
@@ -24,36 +25,24 @@ import org.apache.oro.text.regex.Pattern;
 // List *zzlc*
 // myzzlc::csv::farm_data_rel
 // zzlc::csv::farm_data_rel
-class ListOutputParser extends ListOutputParserImpl {
+class ListLogicalFilesOutput extends ListOutputParserImpl {
 
-  private transient boolean ready = false;
-  private transient Pattern globPattern;
-  private transient boolean found = false;
-
-  public ListOutputParser(String filespec) throws Exception {
+  private transient PrintWriter output;
+  public ListLogicalFilesOutput(String filespec, PrintWriter out) throws Exception {
     super(filespec);
-    globPattern = new GlobCompiler().compile(filespec);
+    output = out;
   }
 
   @Override
   protected void processLine(String line, int logLevel) {
     checkHasErrors(line);
     if (expectedFirstLine.equalsIgnoreCase(line)) {
-      ready = true;
       return;
     }
-    if (ready) {
-      checkIsMatch(line);
+    if (!hasErrors()) {
+      output.println(line);
+    } else {
+      Log.warn("Errors Detected in dfuplus output");
     }
-  }
-
-  protected void checkIsMatch(String line) {
-    if (matcher.matches(line, globPattern)) {
-      found = true;
-    }
-  }
-
-  public boolean found() {
-    return found;
   }
 }

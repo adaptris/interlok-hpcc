@@ -2,7 +2,7 @@ package com.adaptris.hpcc;
 
 import org.apache.commons.exec.LogOutputStream;
 
-public abstract class DfuplusOutputParser extends LogOutputStream {
+abstract class DfuplusOutputParser extends LogOutputStream {
 
   public enum JobStatus {
     SUCCESS,

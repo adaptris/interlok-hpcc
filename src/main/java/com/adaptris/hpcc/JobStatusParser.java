@@ -9,7 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JobStatusParser extends DfuplusOutputParser {
+class JobStatusParser extends DfuplusOutputParser {
 
 
   private enum JobState {
@@ -42,7 +42,7 @@ public class JobStatusParser extends DfuplusOutputParser {
   }
 
 
-  private transient Logger log = LoggerFactory.getLogger(this.getClass());
+  private transient Logger log = LoggerFactory.getLogger("com.adaptris.hpcc.OutputParser");
   private transient String workUnit = null;
   private transient JobStatus jobStatus = null;
   private transient JobState jobState = null;

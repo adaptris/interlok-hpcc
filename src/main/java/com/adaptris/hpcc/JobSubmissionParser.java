@@ -3,9 +3,9 @@ package com.adaptris.hpcc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JobSubmissionParser extends DfuplusOutputParser {
+class JobSubmissionParser extends DfuplusOutputParser {
 
-  private transient Logger log = LoggerFactory.getLogger(this.getClass());
+  private transient Logger log = LoggerFactory.getLogger("com.adaptris.hpcc.OutputParser");
 
   private static final String WUID = "Submitted WUID ";
   private transient String workUnit = null;
