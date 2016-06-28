@@ -9,14 +9,14 @@
 
   <target name="init">
 
-    <property name="ivy.publish.revision" value="3.2-SNAPSHOT"/>  <!-- Version number of this artifact -->
-    <property name="adp-core-version" value="3.2-SNAPSHOT"/>
+    <property name="ivy.publish.revision" value="3.3-SNAPSHOT"/>  <!-- Version number of this artifact -->
+    <property name="adp-core-version" value="3.3-SNAPSHOT"/>
     <property name="manifest.title" value="Interlok/HPCC Integration"/>
-    <property name="src.dir" value="${basedir}/src"/>
+    <property name="src.dir" value="${basedir}/src/main/java"/>
 
-    <property name="testsrc.dir" value="${basedir}/test/src"/>
+    <property name="testsrc.dir" value="${basedir}/src/test/java"/>
     <property name="build.dir" value="${basedir}/build"/>
-    <property name="test.resources.dir" value="${basedir}/test/resources"/>
+    <property name="test.resources.dir" value="${basedir}/src/test/resources"/>
     <property name="example-xml.build.dir"  value="${build.dir}/example-xml"/>
     <property name="example.xml" value="${example-xml.build.dir}"/>
     <property name="doc.dir"                value="${basedir}/docs"/>
