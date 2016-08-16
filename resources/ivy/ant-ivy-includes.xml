@@ -33,6 +33,17 @@
     </tstamp>
     <property environment="env"/>
     <property name="env.COMPUTERNAME" value="${env.HOSTNAME}"/>
+    <path id="combined-PATH">
+      <pathelement path="${env.PATH}"/>
+      <pathelement path="${env.Path}"/>
+    </path>
+    <property name="SYSPATH" refid="combined-PATH"/>
+    <condition property="graphviz.available">
+      <or>
+        <available file="dot.exe" filepath="${SYSPATH}"/>
+        <available file="dot" filepath="${SYSPATH}"/>
+      </or>
+    </condition>      
   </target>
 
   <target name="download-ivy" depends="init-ivy" unless="skip.ivy.download">
@@ -204,7 +215,7 @@
     <macrodef name="create-javadocs" uri="uri:adapter">
       <attribute name="destdir" default="${api.doc.dir}"/>
       <attribute name="sourcepath" default="${src.dir}"/>
-      <element name="ydoc-doclet" optional="true"/>
+      <element name="custom-doclet" optional="true"/>
       <element name="grouping" optional="true"/>
       <element name="packageset-filter" optional="true"/>
       <sequential>
@@ -224,25 +235,10 @@
             <path refid="main.classpath"/>
             <pathelement location="${ant.core.lib}"/>
           </classpath>
-          <ydoc-doclet/>
+          <custom-doclet/>
           <grouping/>
-          
-          
-          
-          
-          
-          
-          
-          
           <link offline="false" href="https://development.adaptris.net/javadocs/v3-snapshot/Interlok-API/"/>
           <link offline="false" href="https://development.adaptris.net/javadocs/v3-snapshot/Interlok-Common/"/>
-          
-          
-          
-          <!--link offline="false" href="http://iron-io.github.io/iron_mq_java/"/-->
-          <!-- current inaccessible for some reason -->
-          <!--link offline="false" href="http://activemq.apache.org/maven/5.3.2/activemq-core/apidocs/"/-->
-          <!--link offline="false" href="http://javadoc.iaik.tugraz.at/iaik_jce/current/" /-->
           <taglet name="com.adaptris.taglet.ConfigTaglet">
             <path refid="classpath.ant-tools"/>
           </taglet>
@@ -253,6 +249,65 @@
       </sequential>
     </macrodef>
 
+    <macrodef name="uml-javadoc-creator" uri="uri:adapter">
+      <attribute name="destdir" default="${api.doc.dir}"/>
+      <attribute name="imgdir" default="${api.img.dir}"/>
+      <attribute name="sourcepath" default="${src.dir}"/>
+      <element name="groups" optional="true"/>
+      <element name="packages" optional="true"/>
+      <sequential>
+        <delete dir ="@{destdir}" />
+        <delete dir ="@{imgdir}" />
+        <mkdir dir ="@{destdir}" />
+        <mkdir dir ="@{imgdir}" />
+        <if>
+          <and>
+            <isset property="graphviz.available"/>
+          </and>
+          <then>
+            <echo message="Building with Graphviz + PlantUML + UMLDoclet"/>
+            <adapter:create-javadocs sourcepath="@{sourcepath}" destdir="@{destdir}">
+              <custom-doclet>
+                <doclet name="nl.talsmasoftware.umldoclet.UMLDoclet" pathref="classpath.ant-tools">
+                  <param name="-umlBasePath" value="@{imgdir}"/>
+                  <param name="-umlImageFormat" value="SVG"/>
+                  <param name="-umlExcludedReferences" value="java.lang.Exception,java.lang.Object,java.lang.Enum"/>
+                  <param name="-umlIncludePrivateClasses" value="false"/>
+                  <param name="-umlIncludePackagePrivateClasses" value="false"/>
+                  <param name="-umlIncludeProtectedClasses" value="false"/>
+                  <param name="-umlIncludeAbstractSuperclassMethods" value="false"/>
+                  <param name="-umlIncludeConstructors" value="false"/>
+                  <param name="-umlIncludePublicFields" value="false"/>
+                  <param name="-umlIncludePackagePrivateFields" value="false"/>
+                  <param name="-umlIncludeProtectedFields" value="false"/>
+                  <param name="-umlIncludeDeprecatedClasses" value="false"/>
+                  <param name="-umlIncludePrivateInnerClasses" value="false"/>
+                  <param name="-umlIncludePackagePrivateInnerClasses" value="false"/>
+                  <param name="-umlIncludeProtectedInnerClasses" value="false"/>
+                </doclet>
+              </custom-doclet>
+              <grouping>
+                <groups/>
+              </grouping>
+              <packageset-filter>
+                <packages/>
+              </packageset-filter>
+            </adapter:create-javadocs>
+          </then>
+          <else>
+            <adapter:create-javadocs sourcepath="@{sourcepath}" destdir="@{destdir}">
+              <grouping>
+                <groups/>
+              </grouping>
+              <packageset-filter>
+                <packages/>
+              </packageset-filter>
+            </adapter:create-javadocs>
+          </else>
+        </if>
+      </sequential>
+    </macrodef>
+    
     <macrodef name="ydoc-javadoc-creator" uri="uri:adapter">
       <attribute name="destdir" default="${api.doc.dir}"/>
       <attribute name="sourcepath" default="${src.dir}"/>
@@ -268,7 +323,7 @@
           </and>
           <then>
             <adapter:create-javadocs sourcepath="@{sourcepath}" destdir="@{destdir}">
-              <ydoc-doclet>
+              <custom-doclet>
                 <doclet name="ydoc.doclets.YStandard"
                   path="${ydoc.dir}/lib/ydoc.jar:${ydoc.dir}/resources:${ydoc.dir}/doc">
                   <param name="-generic"/>
@@ -284,7 +339,7 @@
                   <param name="-tag" value="see"/>
                   <param name="-tag" value="y.uml"/>
                 </doclet>
-              </ydoc-doclet>
+              </custom-doclet>
               <grouping>
                 <groups/>
               </grouping>

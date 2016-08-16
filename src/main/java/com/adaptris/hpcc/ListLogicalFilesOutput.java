@@ -2,8 +2,6 @@ package com.adaptris.hpcc;
 
 import java.io.PrintWriter;
 
-import org.eclipse.jetty.util.log.Log;
-
 // C:\adaptris\HPCCSystems\5.4.2\clienttools\bin>dfuplus action=list server=http://192.168.56.101:8011 name="zzlc*"
 // List zzlc*
 // 00000000 2016-06-16 15:55:40 18852 20308 "ERROR: Error connecting to 192.168.56.101:8011"
@@ -42,7 +40,7 @@ class ListLogicalFilesOutput extends ListOutputParserImpl {
     if (!hasErrors()) {
       output.println(line);
     } else {
-      Log.warn("Errors Detected in dfuplus output");
+      log.warn("Errors Detected in dfuplus output");
     }
   }
 }
