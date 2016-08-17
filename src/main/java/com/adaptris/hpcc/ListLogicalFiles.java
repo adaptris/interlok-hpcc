@@ -31,38 +31,12 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @AdapterComponent
 @ComponentProfile(summary = "Query HPCC for a list of files", tag = "producer,hpcc,dfuplus,thor",
     recommended = {DfuplusConnection.class})
-public class ListLogicalFiles extends DfuPlusWrapper {
+public class ListLogicalFiles extends RequestOnlyImpl {
 
 
   public ListLogicalFiles() {
 
   }
-
-  @Override
-  public final void produce(AdaptrisMessage msg) throws ProduceException {
-    throw new UnsupportedOperationException("Use request()");
-  }
-
-  @Override
-  public void produce(AdaptrisMessage msg, ProduceDestination dest) throws ProduceException {
-    throw new UnsupportedOperationException("Use request()");
-  }
-
-  @Override
-  public final AdaptrisMessage request(AdaptrisMessage msg) throws ProduceException {
-    return request(msg, getDestination(), monitorIntervalMs());
-  }
-
-  @Override
-  public final AdaptrisMessage request(AdaptrisMessage msg, long timeout) throws ProduceException {
-    return request(msg, getDestination(), timeout);
-  }
-
-  @Override
-  public final AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination) throws ProduceException {
-    return request(msg, destination, monitorIntervalMs());
-  }
-
 
   @Override
   public AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination, long timeoutMs) throws ProduceException {
