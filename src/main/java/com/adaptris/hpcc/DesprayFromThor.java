@@ -67,9 +67,9 @@ public class DesprayFromThor extends DfuPlusWrapper {
   }
 
   /**
-   * The output file for dfuplus when despraying.
+   * A temporary directory that we will use when despraying.
    * 
-   * @param tempDir the tempDir to set; default is null which defaults to {@code java.io.tmpdir}
+   * @param tempDir the tempDir to set (not a URL); default is null which defaults to {@code java.io.tmpdir}
    */
   public void setTempDirectory(String tempDir) {
     this.tempDirectory = tempDir;
@@ -134,7 +134,6 @@ public class DesprayFromThor extends DfuPlusWrapper {
 
   private File createAndTrackFile(Object marker) throws IOException {
     File result = null;
-    // If the message is not file-backed, write it to a temp file
     if (getTempDirectory() != null) {
       result = File.createTempFile(this.getClass().getSimpleName(), "", new File(getTempDirectory()));
     } else {
