@@ -48,6 +48,8 @@ public class DfuplusConnection extends NoOpConnection {
   private String password;
 
   @AdvancedConfig
+  private String sourceIp;
+  @AdvancedConfig
   private Integer transferBufferSize;
   @AdvancedConfig
   private Integer throttle;
@@ -95,12 +97,19 @@ public class DfuplusConnection extends NoOpConnection {
   public CommandLine createCommand() throws PasswordException, IOException {
     File dfuPlus = validateCmd(getDfuplusCommand());
     CommandLine cmdLine = new CommandLine(dfuPlus.getCanonicalPath());
+    return addArguments(cmdLine);
+  }
+  
+  public CommandLine addArguments(CommandLine cmdLine) throws PasswordException {
     cmdLine.addArgument(String.format("server=%s", getServer()));
     if (!isBlank(getUsername())) {
       cmdLine.addArgument(String.format("username=%s", getUsername()));
     }
     if (!isBlank(getPassword())) {
       cmdLine.addArgument(String.format("password=%s", Password.decode(getPassword())));
+    }
+    if (getSourceIp() != null) {
+      cmdLine.addArgument(String.format("srcip=%s", getSourceIp()));
     }
     if (getReplicate() != null) {
       cmdLine.addArgument(String.format("replicate=%d", getReplicate().booleanValue() ? 1 : 0));
@@ -124,6 +133,20 @@ public class DfuplusConnection extends NoOpConnection {
       return dfuPlus;
     }
     throw new IOException("Can't execute [" + dfuPlus.getCanonicalPath() + "]");
+  }
+
+  /**
+   * Return the source IP address to use.
+   */
+  public String getSourceIp() {
+    return sourceIp;
+  }
+
+  /**
+   * Set the IP address for the local machine (useful on multi-homed machines where the automatic detection guesses wrong)
+   */
+  public void setSourceIp(String sourceIp) {
+    this.sourceIp = sourceIp;
   }
 
   /**
