@@ -28,6 +28,7 @@
     <property name="testclasses.build.dir" value="${build.dir}/testclasses"/>
     <property name="doc.dir" value="${basedir}/docs"/>
     <property name="api.doc.dir" value="${build.dir}/api"/>
+    <property name="api.img.dir" value="${build.dir}/api-images"/>
     <property name="tests.output.dir" value="${basedir}/testoutput"/>
     <property name="html.tests.output.dir" value="${tests.output.dir}/html"/>
     <property name="jar.version" value="${today}"/>
@@ -98,11 +99,17 @@
 
 
   <target name="javadoc" depends="prepare-ivy" description="Create javadocs">
-    <adapter:ydoc-javadoc-creator sourcepath="${src.dir}" destdir="${api.doc.dir}">
+    <adapter:uml-javadoc-creator sourcepath="${src.dir}" destdir="${api.doc.dir}">
       <groups>
         <group title="Interlok/HPCC Integration" packages="com.adaptris.hpcc:com.adaptris.hpcc.*"/>
       </groups>
-    </adapter:ydoc-javadoc-creator>
+    </adapter:uml-javadoc-creator>
+    <copy todir="${api.doc.dir}">
+      <fileset dir="${api.img.dir}">
+        <include name="**/package.svg"/>
+        <include name="**/package.png"/>
+      </fileset>
+    </copy>    
   </target>
 
   <!-- Perform a release -->

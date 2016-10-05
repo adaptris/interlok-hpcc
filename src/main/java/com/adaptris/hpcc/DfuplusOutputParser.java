@@ -4,7 +4,7 @@ import org.apache.commons.exec.LogOutputStream;
 
 abstract class DfuplusOutputParser extends LogOutputStream {
 
-  public enum JobStatus {
+  enum JobStatus {
     SUCCESS,
     FAILURE,
     NOT_COMPLETE,
