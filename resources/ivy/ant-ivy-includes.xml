@@ -5,6 +5,7 @@
     <property name="ivy.repo" value="nexus-snapshots"/>
     <property name="ivy.dir" value="${basedir}/resources/ivy"/>
     <property name="ivy.jar.file" value="${ivy.dir}/ivy.jar"/>
+    <property name="ivy.settings.xml" value="${ivy.dir}/ivy-settings.xml"/>
     <property name="ivy.download.baseurl" value="https://development.adaptris.net/nexus/content/groups/public/org/apache/ivy/ivy"/>
     <property name="ivy.download.url" value="${ivy.download.baseurl}/${ivy.install.version}/ivy-${ivy.install.version}.jar"/>
     <property name="ivy.xml.file" value="${basedir}/ivy.xml"/>
@@ -43,7 +44,7 @@
         <available file="dot.exe" filepath="${SYSPATH}"/>
         <available file="dot" filepath="${SYSPATH}"/>
       </or>
-    </condition>      
+    </condition>
   </target>
 
   <target name="download-ivy" depends="init-ivy" unless="skip.ivy.download">
@@ -63,7 +64,7 @@
 
   <target name="taskdef.init" depends="init, install-ivy">
     <property name="ivy.logging" value="quiet"/>
-    <ivy:settings file="${ivy.dir}/ivy-settings.xml" />
+    <ivy:settings file="${ivy.settings.xml}" />
     <ivy:resolve file="${ivy.xml.file}" refresh="true" showprogress="false" log="${ivy.logging}" useCacheOnly="${ivy.offline.mode}"/>
 
     <ivy:cachepath pathid="classpath.ant-tools" conf="ant" type="jar,zip,bundle"/>
@@ -307,7 +308,7 @@
         </if>
       </sequential>
     </macrodef>
-    
+
     <macrodef name="ydoc-javadoc-creator" uri="uri:adapter">
       <attribute name="destdir" default="${api.doc.dir}"/>
       <attribute name="sourcepath" default="${src.dir}"/>
@@ -592,7 +593,7 @@
   </target>
 
   <target name="pom2ivy" depends="install-ivy" description="Convert a pom file into an ivy.xml">
-    <ivy:settings file="${basedir}/../ivy-settings.xml" />
+    <ivy:settings file="${ivy.settings.xml}" />
     <ivy:convertpom pomFile="pom.xml" ivyFile="ivy.xml"/>
   </target>
 
