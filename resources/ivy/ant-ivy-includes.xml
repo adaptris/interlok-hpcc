@@ -551,7 +551,7 @@
       <attribute name="artifact.basedir" default="${project.dist.dir}"/>
       <sequential>
         <ivy:resolve file="@{ivy-config}" refresh="true" log="${ivy.logging}"/>
-        <ivy:publish resolver="@{resolver}" revision="@{revision}" overwrite="true" status="@{status}" publishivy="true" >
+        <ivy:publish resolver="@{resolver}" revision="@{revision}" overwrite="true" status="@{status}" publishivy="true" conf="default,master,compile,provided,runtime,test,system,sources,javadoc,optional,examples">
           <artifacts pattern="@{artifact.basedir}/[module]/[type]/[artifact].[ext]"/>
         </ivy:publish>
       </sequential>
@@ -644,7 +644,7 @@
         </zip>
       </then>
     </if>
-    <ivy:makepom ivyfile="${ivy.xml.file}" pomfile="${project.dist.dir}/${project.name}/pom/${project.name}.pom"/>
+    <ivy:makepom ivyfile="${ivy.xml.file}" pomfile="${project.dist.dir}/${project.name}/pom/${project.name}.pom" description="${project.pom.description}"  conf="default,master,compile,provided,runtime,test,system,sources,javadoc,optional"/>
   </target>
 
   <target name="publish" depends="prepare-for-publish">
