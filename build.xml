@@ -48,7 +48,7 @@
 
     <property name="build.tmp.dir" value="${build.dir}/tmp"/>
     <property name="jar.version"            value="${today}-${user.name}"/>
-    <property name="project.name"           value="adp-${ant.project.name}"/>
+    <property name="project.name"           value="interlok-${ant.project.name}"/>
 
     <property name="project.dist.dir" value="${build.dir}/dist"/>
     <property name="project.jar.name" value = "${project.name}.jar"/>
