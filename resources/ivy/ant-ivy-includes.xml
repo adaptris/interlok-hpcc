@@ -25,8 +25,6 @@
     <property name="coverage.build.dir" value="${build.dir}/coverage"/>
     <property name="coverage.metadata.file" value="${basedir}/jacoco.exec"/>
 
-    <property name="code-signing.keystore"  value="${build.dir}/signing/code-signing.jks"/>
-    <property name="code-signing.alias" value="code_signer"/>
     <!-- Default this to false, so that we always sign -->
     <property name="unsigned.code"          value="false"/>
     <tstamp>
@@ -73,8 +71,6 @@
     <property name="cc.classpath" refid="main.classpath"/>
     <echo message="Ivy Resolved Classpath - ${cc.classpath}" level="verbose"/>
     <echo message="Ivy Resolved Classpath for ant - ${anttools.classpath}" level="verbose"/>
-    <!-- yguard obfuscator -->
-    <taskdef name="obfuscate" classname="com.yworks.yguard.YGuardTask" classpathref="classpath.ant-tools" />
     <!-- antcontrib (if statements) -->
     <typedef resource="net/sf/antcontrib/antlib.xml" classpathref="classpath.ant-tools" />
     <!-- jacoco coverage -->
@@ -134,8 +130,6 @@
       <attribute name="manifest"/>
       <attribute name="version" default="${ivy.publish.revision}"/>
       <attribute name="version-title"/>
-      <element name="obfuscate-patternset" optional="true"/>
-      <element name="obfuscate-externals" optional="true"/>
       <element name="jar-services" optional="true"/>
       <sequential>
         <mkdir dir="@{basedir}/META-INF"/>
@@ -144,74 +138,12 @@
           <entry key="build.version" value="@{version}"/>
           <entry key="build.date" value="${build.date}"/>
         </propertyfile>
-        <var name="tmp.jar" value="${build.dir}/tmp.jar"/>
-        <if>
-          <istrue value="${no.obfuscation}"/>
-          <then>
-            <jar jarfile="@{jarfile}"  manifest="@{manifest}" >
-              <fileset dir="@{basedir}"/>
-              <jar-services/>
-            </jar>
-          </then>
-          <else>
-            <jar jarfile="${tmp.jar}"  manifest="@{manifest}" >
-              <fileset dir="@{basedir}"/>
-              <jar-services/>
-            </jar>
-            <adapter:obfuscate input.jar="${tmp.jar}" output.jar="@{jarfile}">
-              <patternset-filter>
-                <obfuscate-patternset/>
-              </patternset-filter>
-              <additional-externalclasses>
-                <obfuscate-externals/>
-              </additional-externalclasses>
-            </adapter:obfuscate>
-          </else>
-        </if>
-        <adapter:sign-jar jarfile="@{jarfile}"/>
-        <var name="tmp.jar" unset="true"/>
+        <jar jarfile="@{jarfile}"  manifest="@{manifest}" >
+          <fileset dir="@{basedir}"/>
+          <jar-services/>
+        </jar>
       </sequential>
     </macrodef>
-
-    <macrodef name="obfuscate" uri="uri:adapter">
-      <attribute name="input.jar"/>
-      <attribute name="output.jar"/>
-      <attribute name="yguard.report" default="${build.dir}/yguard.xml"/>
-      <element name="patternset-filter" optional="true"/>
-      <element name="additional-externalclasses" optional="true"/>
-      <sequential>
-        <obfuscate>
-          <inoutpair in="@{input.jar}" out="@{output.jar}" resources="copy"/>
-          <attribute name="Deprecated"/>
-          <rename replaceclassnamestrings="true" conservemanifest="true" logfile="@{yguard.report}">
-            <property name="expose-attributes" value="Deprecated"/>
-            <property name="language-conformity" value="legal"/>
-            <property name="naming-scheme" value="mix"/>
-            <keep>
-              <class classes="protected" methods="protected" fields="private">
-                <patternset>
-                  <include name="com.adaptris.**.*"/>
-                  <patternset-filter/>
-                </patternset>
-              </class>
-              <attribute name="Deprecated, SourceFile, LineNumberTable, RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations, RuntimeInvisibleAnnotations, RuntimeInvisibleParameterAnnotations">
-                <patternset>
-                  <include name="com.adaptris.**.*"/>
-                  <patternset-filter/>
-                </patternset>
-              </attribute>
-            </keep>
-          </rename>
-          <externalclasses>
-            <path refid="main.classpath"/>
-            <pathelement location="${ant.core.lib}"/>
-            <additional-externalclasses/>
-          </externalclasses>
-        </obfuscate>
-        <delete file="@{input.jar}"/>
-      </sequential>
-    </macrodef>
-
 
     <macrodef name="create-javadocs" uri="uri:adapter">
       <attribute name="destdir" default="${api.doc.dir}"/>
@@ -519,30 +451,6 @@
       </sequential>
     </macrodef>
 
-    <macrodef name="sign-jar" uri="uri:adapter">
-      <attribute name="tsaurl" default="${signjar.tsa.url}"/>
-      <attribute name="jarfile"/>
-      <sequential>
-        <if>
-          <and>
-            <isfalse value="${unsigned.code}"/>
-            <isset property="code-signing.keypass"/>
-            <isset property="code-signing.storepass"/>
-          </and>
-          <then>
-            <!-- We could specify the digestalg / sigalg to backwards compatibility as JDK7 only comes with
-                 SHA256 and SHA256withRSA and if we were to deploy on JRE1.6...
-                 e.g. sigalg="MD5withRSA" digestalg="SHA1"
-                 We sign in backwards compatibility mode because of jms-jmx (which could be deployed in a v2).
-             Use http://tsa.starfieldtech.com or https://timestamp.geotrust.com/tsa as the TSAURL.
-            -->
-            <signjar jar="@{jarfile}" alias="${code-signing.alias}" keystore="${code-signing.keystore}" storepass="${code-signing.storepass}" keypass="${code-signing.keypass}" sigalg="MD5withRSA" digestalg="SHA1" tsaurl="@{tsaurl}">
-            </signjar>
-          </then>
-        </if>
-      </sequential>
-    </macrodef>
-
     <macrodef name="publish-artifact" uri="uri:adapter">
       <attribute name="resolver"/>
       <attribute name="ivy-config"/>
@@ -579,12 +487,6 @@
 
 
   <target name="prepare-ivy" depends="macrodef.init,taskdef.init">
-    <!-- set up main compile classpath using ivy dependecny management -->
-    <!-- Because of MSMQ, we need to restrict it to only standard types, as otherwise we'll have
-         big trouble with .dll + .LIC files
-    -->
-    <mkdir dir="${build.dir}/signing"/>
-    <ivy:retrieve log="${ivy.logging}" pattern="${build.dir}/signing/[artifact].[ext]" conf="signing" type="jks"/>
   </target>
 
   <target name="ivy-report" depends="macrodef.init,taskdef.init" description="Generate an ivy dependency report">
