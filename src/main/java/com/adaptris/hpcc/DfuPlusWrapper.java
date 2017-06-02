@@ -20,8 +20,14 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.validation.Valid;
 
@@ -32,10 +38,12 @@ import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 
 import com.adaptris.annotation.AdvancedConfig;
+import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.core.AdaptrisMessageProducerImp;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.ExceptionHelper;
+import com.adaptris.core.util.ManagedThreadFactory;
 import com.adaptris.hpcc.DfuplusOutputParser.JobStatus;
 import com.adaptris.security.exc.PasswordException;
 import com.adaptris.util.TimeInterval;
@@ -50,39 +58,58 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
   private static final TimeInterval MONITOR_INTERVAL = new TimeInterval(30L, TimeUnit.SECONDS);
   // 5 minutes to submit a job...
   private static final TimeInterval EXEC_TIMEOUT_INTERVAL = new TimeInterval(5L, TimeUnit.MINUTES);
+  private static final TimeInterval MAX_WAIT = new TimeInterval(1L, TimeUnit.HOURS);
 
   @Valid
   @AdvancedConfig
+  @InputFieldDefault(value = "30 seconds")
   private TimeInterval monitorInterval;
 
+  @Valid
+  @AdvancedConfig
+  @InputFieldDefault(value = "1 hour")
+  private TimeInterval maxWait;
+
   private transient Calendar nextLogEvent = null;
+  private transient Future<JobStatus> currentWorkunit = null;
+  private transient ExecutorService executor;
 
   public DfuPlusWrapper() {}
 
 
   @Override
   public void close() {
-    // NOP
+    boolean success = false;
+    try {
+      executor.shutdown();
+      success = executor.awaitTermination(60, TimeUnit.SECONDS);
+    }
+    catch (InterruptedException e) {
+    }
+    if (!success) {
+      executor.shutdownNow();
+    }
   }
 
   @Override
   public void init() throws CoreException {
-    // NOP
+    executor = Executors.newSingleThreadExecutor(new ManagedThreadFactory());
   }
 
   @Override
   public void start() throws CoreException {
-    // NOP
   }
 
   @Override
   public void stop() {
-    // NOP
+    if (currentWorkunit != null) {
+      currentWorkunit.cancel(true);
+    }
+    currentWorkunit = null;
   }
 
   @Override
   public void prepare() throws CoreException {
-    // NOP
   }
 
 
@@ -109,6 +136,23 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     return getMonitorInterval() != null ? getMonitorInterval().toMilliseconds() : MONITOR_INTERVAL.toMilliseconds();
   }
 
+  public TimeInterval getMaxWait() {
+    return maxWait;
+  }
+
+  /**
+   * Set the max wait for a workunit to complete.
+   * 
+   * @param maxWait the max wait, if not specified, defaults to 1 hour.
+   */
+  public void setMaxWait(TimeInterval maxWait) {
+    this.maxWait = maxWait;
+  }
+
+  protected long maxWaitMs() {
+    return getMaxWait() != null ? getMaxWait().toMilliseconds() : MAX_WAIT.toMilliseconds();
+  }
+
   protected void execute(CommandLine cmdLine) throws ProduceException {
     // Create DFU command
     // String cmd = "dfuplus action=%s format=%s maxrecordsize=%d sourcefile=%s dstname=%s server=%s dstcluster=%s username=%s
@@ -117,26 +161,23 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     try {
       executeInternal(cmdLine, stdout);
       JobStatus status = stdout.getJobStatus();
-      long sleepyTime = calculateWait(0);
-      while (status == JobStatus.NOT_COMPLETE) {
-        status = requestStatus(stdout.getWorkUnitId());
-        if (status == JobStatus.NOT_COMPLETE) {
-          TimeUnit.MILLISECONDS.sleep(sleepyTime);
-          sleepyTime = calculateWait(sleepyTime);
-        }
-        timedLogger("WUID [{}]; status=[{}]", stdout.getWorkUnitId(), status.name());
-      }
+      currentWorkunit = executor.submit(new WaitForWorkUnit(status, stdout.getWorkUnitId()));
+      status = currentWorkunit.get(maxWaitMs(), TimeUnit.MILLISECONDS);
       if (status == JobStatus.FAILURE) {
         throw new ProduceException("Job " + stdout.getWorkUnitId() + " was not successful");
       }
-    } catch (AbortJobException | InterruptedException e) {
+    }
+    catch (AbortJobException | InterruptedException | TimeoutException e) {
       abortJob(stdout.getWorkUnitId());
-      throw ExceptionHelper.wrapProduceException(e);
-    } catch (PasswordException | IOException e) {
+      throw ExceptionHelper.wrapProduceException(generateExceptionMessage(e), e);
+    }
+    catch (ExecutionException e) {
       throw ExceptionHelper.wrapProduceException(e);
     }
+    finally {
+      currentWorkunit = null;
+    }
   }
-
 
   protected void executeInternal(CommandLine cmdLine, OutputStream stdout) throws ProduceException, AbortJobException {
     int exit = -1;
@@ -154,6 +195,17 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     if (watchdog.killedProcess() || exit != 0) {
       throw new AbortJobException("Job killed due to timeout/ExitCode != 0");
     }
+  }
+
+  protected static String generateExceptionMessage(Exception e) {
+    String msg = e.getMessage();
+    if (e instanceof InterruptedException) {
+      msg = "Interrupted waiting for workunit completion";
+    }
+    if (e instanceof TimeoutException) {
+      msg = "Timeout exceeded for workunit completion";
+    }
+    return msg;
   }
 
   protected long calculateWait(long current) {
@@ -229,4 +281,35 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     @Override
     protected void processLine(String line, int logLevel) {}
   }
+
+  private class WaitForWorkUnit implements Callable<JobStatus> {
+
+    private String workUnit;
+    private JobStatus status;
+    private String threadName;
+    
+    WaitForWorkUnit(JobStatus initialStatus, String wuid) {
+      workUnit = wuid;
+      status = initialStatus;
+      threadName = Thread.currentThread().getName();
+    }
+
+    @Override
+    public JobStatus call() throws Exception {
+      Thread.currentThread().setName(threadName);
+      long sleepyTime = calculateWait(0);
+      while (status == JobStatus.NOT_COMPLETE) {
+        status = requestStatus(workUnit);
+        if (status == JobStatus.NOT_COMPLETE) {
+          TimeUnit.MILLISECONDS.sleep(sleepyTime);
+          sleepyTime = calculateWait(sleepyTime);
+        }
+        Thread.sleep(sleepyTime);
+        timedLogger("WUID [{}]; status=[{}]", workUnit, status.name());
+      }
+      return status;
+    }
+
+  }
+
 }
