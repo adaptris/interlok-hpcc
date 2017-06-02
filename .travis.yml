@@ -2,7 +2,7 @@ language: java
 sudo: required
 dist: trusty
 
-script: ant -Divy.logging=default compile
+script: ant -Divy.logging=default test-no-reports
 
 addons:
   apt:
