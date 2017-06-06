@@ -72,23 +72,15 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
 
   private transient Calendar nextLogEvent = null;
   private transient Future<JobStatus> currentWorkunit = null;
-  private transient ExecutorService executor;
+  protected transient ExecutorService executor;
 
   public DfuPlusWrapper() {}
 
 
   @Override
   public void close() {
-    boolean success = false;
-    try {
-      executor.shutdown();
-      success = executor.awaitTermination(60, TimeUnit.SECONDS);
-    }
-    catch (InterruptedException e) {
-    }
-    if (!success) {
-      executor.shutdownNow();
-    }
+    executor.shutdownNow();
+    executor = null;
   }
 
   @Override
