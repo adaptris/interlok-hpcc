@@ -15,7 +15,10 @@
 */
 package com.adaptris.hpcc;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.exec.CommandLine;
 
@@ -50,11 +53,20 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
     recommended = {DfuplusConnection.class})
 public class PollThor extends RequestOnlyImpl {
 
+  private transient Future<Void> fileCheckStatus = null;
 
   public PollThor() {
 
   }
 
+  @Override
+  public void stop() {
+    if (fileCheckStatus != null) {
+      fileCheckStatus.cancel(true);
+    }
+    fileCheckStatus = null;
+  }
+  
   @Override
   public AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination, long timeoutMs) throws ProduceException {
     try {
@@ -64,24 +76,54 @@ public class PollThor extends RequestOnlyImpl {
       commandLine.addArgument(String.format("name=%s", dest));
       log.trace("Executing {}", commandLine);
       ListOutputParser parser = new ListOutputParser(dest);
+      fileCheckStatus = executor.submit(new WaitForFile(parser, commandLine, dest));
+      fileCheckStatus.get(maxWaitMs(), TimeUnit.MILLISECONDS);
+    }
+    catch (AbortJobException | InterruptedException | TimeoutException e) {
+      throw ExceptionHelper.wrapProduceException(generateExceptionMessage(e), e);
+    }
+    catch (Exception e) {
+      throw ExceptionHelper.wrapProduceException(e);
+    } finally {
+      fileCheckStatus = null;
+    }
+    return msg;
+  }
+
+  private class WaitForFile implements Callable<Void> {
+
+    private String filespec;
+    private ListOutputParser outputParser;
+    private String threadName;
+    private CommandLine cmd;
+
+    WaitForFile(ListOutputParser initialStatus, CommandLine commandline, String filespec) {
+      this.filespec = filespec;
+      outputParser = initialStatus;
+      this.cmd = commandline;
+      threadName = Thread.currentThread().getName();
+    }
+
+    @Override
+    public Void call() throws Exception {
+      Thread.currentThread().setName(threadName);
       long sleepyTime = calculateWait(0);
-      while (!parser.found()) {
-        executeInternal(commandLine, parser);
-        if (parser.hasErrors()) {
+      while (!outputParser.found()) {
+        executeInternal(cmd, outputParser);
+        if (outputParser.hasErrors()) {
           throw new ProduceException("Errors executing dfuplus");
         }
-        if (!parser.found()) {
-          log.trace("[{}] not found, retrying", dest, sleepyTime);
+        if (!outputParser.found()) {
+          log.trace("[{}] not found, retrying", filespec, sleepyTime);
           TimeUnit.MILLISECONDS.sleep(sleepyTime);
           sleepyTime = calculateWait(sleepyTime);
         } else {
           break;
         }
-        parser = new ListOutputParser(dest);
+        outputParser = new ListOutputParser(filespec);
       }
-    } catch (Exception e) {
-      throw ExceptionHelper.wrapProduceException(e);
+      return null;
     }
-    return msg;
+
   }
 }
