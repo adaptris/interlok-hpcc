@@ -20,14 +20,17 @@ import java.io.IOException;
 import org.apache.commons.exec.CommandLine;
 import org.hibernate.validator.constraints.NotBlank;
 
+import com.adaptris.annotation.InputFieldHint;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
+import com.adaptris.core.util.Args;
 import com.adaptris.security.exc.PasswordException;
 
 public abstract class SprayToThorImpl extends DfuPlusWrapper {
 
   @NotBlank
+  @InputFieldHint(expression = true)
   private String cluster;
   private Boolean overwrite;
 
@@ -88,7 +91,7 @@ public abstract class SprayToThorImpl extends DfuPlusWrapper {
   }
 
   public void setCluster(String cluster) {
-    this.cluster = cluster;
+    this.cluster = Args.notBlank(cluster, "cluster");
   }
 
   public Boolean getOverwrite() {
@@ -103,10 +106,10 @@ public abstract class SprayToThorImpl extends DfuPlusWrapper {
     return getOverwrite() != null ? getOverwrite().booleanValue() : false;
   }
 
-  protected CommandLine createSprayCommand() throws PasswordException, IOException {
+  protected CommandLine createSprayCommand(AdaptrisMessage msg) throws PasswordException, IOException {
     CommandLine cmdLine = retrieveConnection(DfuplusConnection.class).createCommand();
     cmdLine.addArgument("action=spray");
-    cmdLine.addArgument(String.format("dstcluster=%s", getCluster()));
+    cmdLine.addArgument(String.format("dstcluster=%s", msg.resolve(getCluster())));
     cmdLine.addArgument(String.format("overwrite=%d", overwrite() ? 1 : 0));
     cmdLine.addArgument("nowait=1");
     return cmdLine;

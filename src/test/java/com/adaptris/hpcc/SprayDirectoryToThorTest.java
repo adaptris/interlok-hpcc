@@ -32,15 +32,13 @@ public class SprayDirectoryToThorTest extends ProducerCase {
     c.setDfuplusCommand("/opt/path/to/hpcc/client/tools/bin/dfuplus");
     c.setUsername("myuser");
     c.setPassword("myPassword");
-
+    c.setSourceIp("192.168.45.1");
     SprayDirectoryToThor p = new SprayDirectoryToThor();
     p.setCluster("mythor");
     p.setDestination(new ConfiguredProduceDestination("~test::test"));
     p.setOverwrite(true);
     p.setPrefix("FILENAME,FILESIZE");
-    p.setSourceDirectoryKey("metadataKeyContainingDirectory");
+    p.setSourceDirectory("%message{metadataKeyContainingDirectory}");
     return new StandaloneProducer(c, p);
   }
-
-
 }

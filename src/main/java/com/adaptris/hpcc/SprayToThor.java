@@ -67,7 +67,7 @@ public class SprayToThor extends SprayToThorImpl {
     Object marker = new Object();
     File sourceFile = saveFile(msg, marker);
     try {
-      CommandLine commandLine = createSprayCommand();
+      CommandLine commandLine = createSprayCommand(msg);
       commandLine.addArgument(String.format("format=%s", getFormat().name().toLowerCase()));
       commandLine.addArgument(String.format("maxrecordsize=%d", getMaxRecordSize()));
       commandLine.addArgument(String.format("srcfile=%s", sourceFile.getCanonicalPath()));
