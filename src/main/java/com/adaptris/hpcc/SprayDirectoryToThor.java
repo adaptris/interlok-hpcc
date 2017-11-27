@@ -21,14 +21,17 @@ import java.io.File;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
+import org.hibernate.validator.constraints.NotBlank;
 
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
+import com.adaptris.annotation.InputFieldHint;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
+import com.adaptris.core.util.Args;
 import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -67,6 +70,10 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 public class SprayDirectoryToThor extends SprayToThorImpl {
 
   private String prefix;
+  @NotBlank
+  @InputFieldHint(expression = true)
+  private String sourceDirectory;
+  @Deprecated
   private String sourceDirectoryKey;
   @AdvancedConfig
   private Boolean deleteSourceDirectory;
@@ -79,7 +86,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
     // dstcluster=mythor dstname=zzlc::json::historical_weather_04 overwrite=1 PREFIX=FILENAME,FILESIZE
     // server= nosplit=1 username= password=
     try {
-      CommandLine commandLine = createSprayCommand();
+      CommandLine commandLine = createSprayCommand(msg);
       commandLine.addArgument(String.format("srcfile=%s", getSource(msg)));
       commandLine.addArgument(String.format("dstname=%s", destination.getDestination(msg)));
       if (!isBlank(getPrefix())) {
@@ -110,7 +117,9 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
 
   /**
    * @return the sourceDirectoryKey
+   * @deprecated since 3.6.6 use {@link #getSourceDirectory()} instead.
    */
+  @Deprecated
   public String getSourceDirectoryKey() {
     return sourceDirectoryKey;
   }
@@ -119,29 +128,30 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
    * Set the metadata containing the source directory to upload.
    * 
    * @param s the sourceDirectoryKey to set
+   * @deprecated since 3.6.6 use {@link #setSourceDirectory(String)} instead.
    */
+  @Deprecated
   public void setSourceDirectoryKey(String s) {
     this.sourceDirectoryKey = s;
   }
 
   private String getSource(AdaptrisMessage msg) throws Exception {
     String result = "";
-    if (msg.headersContainsKey(getSourceDirectoryKey())) {
-      // Now turn it into a canonical path so that it's platform correct as
-      // it appears to D:/hpcc/json-weatherdata/weather02/* doesn't work well.
-      String dir = getSourceDir(msg).getCanonicalPath();
-      result = String.format("%1$s%2$s*", dir, File.separator);
-    }
+    result = String.format("%1$s%2$s*", getSourceDir(msg), File.separator);
     log.trace("Source Files [{}]", result);
     return result;
   }
 
   private File getSourceDir(AdaptrisMessage msg) throws Exception {
-    File f = null;
-    if (msg.headersContainsKey(getSourceDirectoryKey())) {
-      f = new File(msg.getMetadataValue(getSourceDirectoryKey()));
+    File dir = null;
+    if (!isBlank(getSourceDirectoryKey())) {
+      log.warn("source-directory-key is deprecated; use source-directory instead");
+      dir = new File(msg.getMetadataValue(getSourceDirectoryKey()));
     }
-    return f;
+    else {
+      dir = new File(msg.resolve(getSourceDirectory()));
+    }
+    return dir;
   }
 
   private void postSprayCleanup(AdaptrisMessage msg) throws Exception {
@@ -170,5 +180,18 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
 
   private boolean deleteSourceDirectory() {
     return getDeleteSourceDirectory() != null ? getDeleteSourceDirectory().booleanValue() : false;
+  }
+
+  public String getSourceDirectory() {
+    return sourceDirectory;
+  }
+
+  /**
+   * Set the source directory.
+   * 
+   * @param dir the source directory.
+   */
+  public void setSourceDirectory(String dir) {
+    this.sourceDirectory = Args.notBlank(dir, "sourceDirectory");
   }
 }
