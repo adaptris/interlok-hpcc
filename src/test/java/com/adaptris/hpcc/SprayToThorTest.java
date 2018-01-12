@@ -18,11 +18,106 @@ package com.adaptris.hpcc;
 import com.adaptris.core.ConfiguredProduceDestination;
 import com.adaptris.core.ProducerCase;
 import com.adaptris.core.StandaloneProducer;
+import com.adaptris.hpcc.arguments.CSVSprayFormat;
+import com.adaptris.hpcc.arguments.FixedSprayFormat;
+import com.adaptris.hpcc.arguments.SprayFormat;
+import org.apache.commons.exec.CommandLine;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class SprayToThorTest extends ProducerCase {
 
   public SprayToThorTest(String name) {
     super(name);
+  }
+
+  @Test
+  public void testLegacyCsvFormat() throws Exception {
+    SprayToThor sprayToThor = new SprayToThor();
+    sprayToThor.setFormat(SprayToThor.FORMAT.CSV);
+    CommandLine cmdLine = new CommandLine("/bin/dfuplus");
+    sprayToThor.addFormatArguments(cmdLine);
+    assertEquals(2, cmdLine.getArguments().length);
+    assertEquals("format=csv", cmdLine.getArguments()[0]);
+    assertEquals("maxrecordsize=8192", cmdLine.getArguments()[1]);
+  }
+
+  @Test
+  public void testLegacyCsvFormatMaxRecordSize() throws Exception {
+    SprayToThor sprayToThor = new SprayToThor();
+    sprayToThor.setFormat(SprayToThor.FORMAT.CSV);
+    sprayToThor.setMaxRecordSize(214);
+    CommandLine cmdLine = new CommandLine("/bin/dfuplus");
+    sprayToThor.addFormatArguments(cmdLine);
+    assertEquals(2, cmdLine.getArguments().length);
+    assertEquals("format=csv", cmdLine.getArguments()[0]);
+    assertEquals("maxrecordsize=214", cmdLine.getArguments()[1]);
+  }
+
+  /**
+   * Technically this won't work with dfuplus as it doesn't set <code>recordsize</code>.
+   * @throws Exception
+   */
+  @Test
+  public void testLegacyFixedFormat() throws Exception {
+    SprayToThor sprayToThor = new SprayToThor();
+    sprayToThor.setFormat(SprayToThor.FORMAT.FIXED);
+    CommandLine cmdLine = new CommandLine("/bin/dfuplus");
+    sprayToThor.addFormatArguments(cmdLine);
+    assertEquals(2, cmdLine.getArguments().length);
+    assertEquals("format=fixed", cmdLine.getArguments()[0]);
+    assertEquals("maxrecordsize=8192", cmdLine.getArguments()[1]);
+  }
+
+  /**
+   * Technically this won't work with dfuplus as it doesn't set <code>recordsize</code>.
+   * @throws Exception
+   */
+  @Test
+  public void testLegacyFixedFormatMaxRecordSize() throws Exception {
+    SprayToThor sprayToThor = new SprayToThor();
+    sprayToThor.setFormat(SprayToThor.FORMAT.FIXED);
+    sprayToThor.setMaxRecordSize(214);
+    CommandLine cmdLine = new CommandLine("/bin/dfuplus");
+    sprayToThor.addFormatArguments(cmdLine);
+    assertEquals(2, cmdLine.getArguments().length);
+    assertEquals("format=fixed", cmdLine.getArguments()[0]);
+    assertEquals("maxrecordsize=214", cmdLine.getArguments()[1]);
+  }
+
+  @Test
+  public void testCSVFormat() throws Exception {
+    SprayToThor sprayToThor = new SprayToThor();
+    sprayToThor.setSprayFormat(new CSVSprayFormat());
+    CommandLine cmdLine = new CommandLine("/bin/dfuplus");
+    sprayToThor.addFormatArguments(cmdLine);
+    assertEquals(1, cmdLine.getArguments().length);
+    assertEquals("format=csv", cmdLine.getArguments()[0]);
+  }
+
+  @Test
+  public void testCSVFormatMaxRecordSize() throws Exception {
+    SprayToThor sprayToThor = new SprayToThor();
+    CSVSprayFormat sprayFormat = new CSVSprayFormat();
+    sprayFormat.setMaxRecordSize(214);
+    sprayToThor.setSprayFormat(sprayFormat);
+    CommandLine cmdLine = new CommandLine("/bin/dfuplus");
+    sprayToThor.addFormatArguments(cmdLine);
+    assertEquals(2, cmdLine.getArguments().length);
+    assertEquals("format=csv", cmdLine.getArguments()[0]);
+    assertEquals("maxrecordsize=214", cmdLine.getArguments()[1]);
+  }
+
+  @Test
+  public void testFixed() throws Exception {
+    SprayToThor sprayToThor = new SprayToThor();
+    sprayToThor.setSprayFormat(new FixedSprayFormat(125));
+    CommandLine cmdLine = new CommandLine("/bin/dfuplus");
+    sprayToThor.addFormatArguments(cmdLine);
+    assertEquals(2, cmdLine.getArguments().length);
+    assertEquals("format=fixed", cmdLine.getArguments()[0]);
+    assertEquals("recordsize=125", cmdLine.getArguments()[1]);
   }
 
   @Override
@@ -36,7 +131,7 @@ public class SprayToThorTest extends ProducerCase {
     SprayToThor p = new SprayToThor();
     p.setCluster("mythor");
     p.setDestination(new ConfiguredProduceDestination("~test::test"));
-    p.setFormat(SprayToThor.FORMAT.CSV);
+    p.setSprayFormat(new CSVSprayFormat());
     p.setOverwrite(true);
     return new StandaloneProducer(c, p);
   }
