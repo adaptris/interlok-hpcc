@@ -8,6 +8,8 @@ import org.apache.commons.exec.CommandLine;
  */
 public abstract class SprayFormat implements ComponentLifecycleExtension {
 
+  public enum ENCODING {ASCII, UTF8, UTF8N, UTF16, UTF16LE, UTF16BE, UTF32, UTF32LE, UTF32BE}
+
   abstract String getFormat();
 
   abstract void addCommandSpecificArguments(CommandLine commandLine);
@@ -17,7 +19,7 @@ public abstract class SprayFormat implements ComponentLifecycleExtension {
     addCommandSpecificArguments(commandLine);
   }
 
-  final void addArgumentIfNoNull(CommandLine commandLine, String key, Object value){
+  final void addArgumentIfNotNull(CommandLine commandLine, String key, Object value){
     if (value != null){
       commandLine.addArgument(String.format("%s=%s", key, value), false);
     }

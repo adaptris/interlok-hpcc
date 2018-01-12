@@ -30,7 +30,7 @@ public class FixedSprayFormat extends SprayFormat {
   }
 
   public FixedSprayFormat(int recordSize){
-    this.recordSize = recordSize;
+    setRecordSize(recordSize);
   }
 
   @Override
@@ -57,6 +57,6 @@ public class FixedSprayFormat extends SprayFormat {
   }
 
   public void setRecordSize(Integer recordSize) {
-    this.recordSize = recordSize;
+    this.recordSize = Args.notNull(recordSize, "recordSize");;
   }
 }
