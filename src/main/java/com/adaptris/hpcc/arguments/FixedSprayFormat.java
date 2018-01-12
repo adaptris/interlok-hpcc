@@ -18,7 +18,7 @@ import org.hibernate.validator.constraints.NotBlank;
  *
  * @author mwarman
  */
-@XStreamAlias("hpcc-format-fixed")
+@XStreamAlias("spray-format-fixed")
 public class FixedSprayFormat extends SprayFormat {
 
   private static final String FORMAT = "fixed";

@@ -22,7 +22,7 @@ import org.apache.commons.exec.CommandLine;
  *
  * @author mwarman
  */
-@XStreamAlias("hpcc-format-csv")
+@XStreamAlias("spray-format-csv")
 public class CSVSprayFormat extends SprayFormat {
 
   private static final String FORMAT = "csv";
