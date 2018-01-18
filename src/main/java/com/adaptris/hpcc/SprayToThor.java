@@ -86,6 +86,7 @@ public class SprayToThor extends SprayToThorImpl {
 
   void addFormatArguments(CommandLine commandLine){
     if(getSprayFormat() == null) {
+      log.warn("Use spray-format instead");
       commandLine.addArgument(String.format("format=%s", getFormat().name().toLowerCase()));
       commandLine.addArgument(String.format("maxrecordsize=%d", maxRecordSize()));
     } else {
