@@ -18,6 +18,7 @@ package com.adaptris.hpcc;
 import java.io.File;
 import java.io.IOException;
 
+import com.adaptris.hpcc.arguments.SprayFormat;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.FileUtils;
@@ -49,16 +50,21 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @AdapterComponent
 @ComponentProfile(summary = "Spray the current message into HPCC via dfuplus", tag = "producer,hpcc,dfuplus",
     recommended = {DfuplusConnection.class})
-@DisplayOrder(order = {"cluster", "format", "maxRecordSize", "overwrite", "tempDirectory"})
+@DisplayOrder(order = {"cluster", "sprayFormat", "overwrite", "tempDirectory"})
 public class SprayToThor extends SprayToThorImpl {
 
+  @Deprecated
   public enum FORMAT { CSV, FIXED; }
+
+  private SprayFormat sprayFormat;
 
   @AdvancedConfig
   private String tempDirectory;
 
+  @Deprecated
   private FORMAT format;
-  private int maxRecordSize = 8192;
+  @Deprecated
+  private Integer maxRecordSize;
 
   private transient final FileCleaningTracker tracker = new FileCleaningTracker();
   
@@ -68,8 +74,7 @@ public class SprayToThor extends SprayToThorImpl {
     File sourceFile = saveFile(msg, marker);
     try {
       CommandLine commandLine = createSprayCommand(msg);
-      commandLine.addArgument(String.format("format=%s", getFormat().name().toLowerCase()));
-      commandLine.addArgument(String.format("maxrecordsize=%d", getMaxRecordSize()));
+      addFormatArguments(commandLine);
       commandLine.addArgument(String.format("srcfile=%s", sourceFile.getCanonicalPath()));
       commandLine.addArgument(String.format("dstname=%s", destination.getDestination(msg)));
       log.trace("Executing {}", commandLine);
@@ -79,20 +84,59 @@ public class SprayToThor extends SprayToThorImpl {
     }
   }
 
+  void addFormatArguments(CommandLine commandLine){
+    if(getSprayFormat() == null) {
+      log.warn("Use spray-format instead");
+      commandLine.addArgument(String.format("format=%s", getFormat().name().toLowerCase()));
+      commandLine.addArgument(String.format("maxrecordsize=%d", maxRecordSize()));
+    } else {
+      getSprayFormat().addArguments(commandLine);
+    }
+  }
+
+  /**
+   * @deprecated since 3.7 use {@link #getSprayFormat()} instead.
+   */
+  @Deprecated
   public FORMAT getFormat() {
     return format;
   }
 
+  /**
+   * @deprecated since 3.7 use {@link #setSprayFormat(SprayFormat)} instead.
+   */
+  @Deprecated
   public void setFormat(FORMAT format) {
     this.format = format;
   }
 
-  public int getMaxRecordSize() {
+  /**
+   * @deprecated since 3.7 use {@link #getSprayFormat()} instead.
+   */
+  @Deprecated
+  public Integer getMaxRecordSize() {
     return maxRecordSize;
   }
 
-  public void setMaxRecordSize(int maxRecordSize) {
+  /**
+   * @deprecated since 3.7 use {@link #setSprayFormat(SprayFormat)} instead.
+   */
+  @Deprecated
+  public void setMaxRecordSize(Integer maxRecordSize) {
     this.maxRecordSize = maxRecordSize;
+  }
+
+  @Deprecated
+  private int maxRecordSize() {
+    return getMaxRecordSize() != null ? getMaxRecordSize() : 8192;
+  }
+
+  public SprayFormat getSprayFormat() {
+    return sprayFormat;
+  }
+
+  public void setSprayFormat(SprayFormat sprayFormat) {
+    this.sprayFormat = sprayFormat;
   }
 
   /**

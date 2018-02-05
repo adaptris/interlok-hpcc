@@ -158,7 +158,10 @@ public class DfuplusConnection extends NoOpConnection {
   }
 
   /**
-   * Set the IP address for the local machine (useful on multi-homed machines where the automatic detection guesses wrong)
+   * Set the IP address for the local machine (useful on multi-homed machines where the automatic detection guesses wrong) which is
+   * equivalent to using {@code srcip=} parameter.
+   * 
+   * @param sourceIp the source IP.
    */
   public void setSourceIp(String sourceIp) {
     this.sourceIp = sourceIp;
