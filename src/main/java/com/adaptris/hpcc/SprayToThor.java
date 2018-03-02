@@ -18,7 +18,6 @@ package com.adaptris.hpcc;
 import java.io.File;
 import java.io.IOException;
 
-import com.adaptris.hpcc.arguments.SprayFormat;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.FileUtils;
@@ -32,6 +31,7 @@ import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.lms.FileBackedMessage;
 import com.adaptris.core.util.ExceptionHelper;
+import com.adaptris.hpcc.arguments.SprayFormat;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
@@ -70,8 +70,7 @@ public class SprayToThor extends SprayToThorImpl {
   
   @Override
   public void produce(AdaptrisMessage msg, ProduceDestination destination) throws ProduceException {
-    Object marker = new Object();
-    File sourceFile = saveFile(msg, marker);
+    File sourceFile = saveFile(msg, msg);
     try {
       CommandLine commandLine = createSprayCommand(msg);
       addFormatArguments(commandLine);
