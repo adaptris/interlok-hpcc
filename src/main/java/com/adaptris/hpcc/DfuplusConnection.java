@@ -32,6 +32,7 @@ import com.adaptris.core.AdaptrisConnection;
 import com.adaptris.core.NoOpConnection;
 import com.adaptris.core.SharedConnection;
 import com.adaptris.core.util.Args;
+import com.adaptris.interlok.resolver.ExternalResolver;
 import com.adaptris.security.exc.PasswordException;
 import com.adaptris.security.password.Password;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -59,7 +60,7 @@ public class DfuplusConnection extends NoOpConnection {
   @NotBlank
   private String server;
   private String username;
-  @InputFieldHint(style = "PASSWORD")
+  @InputFieldHint(style = "PASSWORD", external = true)
   private String password;
 
   @AdvancedConfig
@@ -121,7 +122,7 @@ public class DfuplusConnection extends NoOpConnection {
       cmdLine.addArgument(String.format("username=%s", getUsername()));
     }
     if (!isBlank(getPassword())) {
-      cmdLine.addArgument(String.format("password=%s", Password.decode(getPassword())));
+      cmdLine.addArgument(String.format("password=%s", Password.decode(ExternalResolver.resolve(getPassword()))));
     }
     if (getSourceIp() != null) {
       cmdLine.addArgument(String.format("srcip=%s", getSourceIp()));
