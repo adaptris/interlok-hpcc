@@ -2,6 +2,7 @@ language: java
 sudo: required
 dist: trusty
 
+install: ant -version
 script: ant -Divy.logging=default test
 
 after_success:
