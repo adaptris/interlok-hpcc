@@ -7,7 +7,7 @@ ext {
   defaultNexusRepo = project.hasProperty('defaultNexusRepo') ? project.getProperty('defaultNexusRepo') : 'https://repo1.maven.org/maven2/'
   interlokJavadocs= project.hasProperty('interlokJavadocs') ? project.getProperty('interlokJavadocs') : 'https://development.adaptris.net/javadocs/latest/Interlok-API/'
   interlokCommonJavadocs= project.hasProperty('interlokJavadocs') ? project.getProperty('interlokJavadocs') : 'https://development.adaptris.net/javadocs/latest/Interlok-Common/'
-  componentName='Interlok/JSON+CSV conversions'
+  componentName='Interlok/HPCC Integration'
   organizationName = "Adaptris Ltd"
   organizationUrl = "http://interlok.adaptris.net"
   slf4jVersion = '1.7.25'
@@ -170,9 +170,9 @@ publishing {
       artifact examplesJar { classifier "examples" }
 
       pom.withXml {
-        asNode().appendNode("description", "Transform CSV into JSON and vice versa")
+        asNode().appendNode("description", "Interlok/HPCC Integration via dfuplus executable")
         def properties = asNode().appendNode("properties")
-        properties.appendNode("target", "3.6.6+")
+        properties.appendNode("target", "3.6.1+")
       }
     }
   }
