@@ -289,14 +289,18 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     @Override
     public JobStatus call() throws Exception {
       Thread.currentThread().setName(threadName);
+      long totalTime = 0;
       long sleepyTime = calculateWait(0);
       while (status == JobStatus.NOT_COMPLETE) {
         status = requestStatus(workUnit);
         if (status == JobStatus.NOT_COMPLETE) {
           TimeUnit.MILLISECONDS.sleep(sleepyTime);
+          totalTime += sleepyTime;
           sleepyTime = calculateWait(sleepyTime);
+          if (totalTime >= maxWaitMs()) {
+            throw new ProduceException("Internal Timeout has been exceeded");
+          }
         }
-        Thread.sleep(sleepyTime);
         timedLogger("WUID [{}]; status=[{}]", workUnit, status.name());
       }
       return status;
