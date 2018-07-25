@@ -15,6 +15,7 @@ ext {
   organizationUrl = "http://interlok.adaptris.net"
   slf4jVersion = '1.7.25'
 }
+
 ext.hasGraphViz = { ->
   def app = "dot"
   if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -226,6 +227,7 @@ publishing {
       artifact sourcesJar { classifier "sources" }
 
       pom.withXml {
+        asNode().appendNode("name", componentName)
         asNode().appendNode("description", "Interlok/HPCC Integration via dfuplus executable")
         def properties = asNode().appendNode("properties")
         properties.appendNode("target", "3.6.1+")
