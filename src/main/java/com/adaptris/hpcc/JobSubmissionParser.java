@@ -51,6 +51,7 @@ class JobSubmissionParser extends DfuplusOutputParser {
 
   @Override
   protected void processLine(String line, int logLevel) {
+    log.trace("Processing Line [{}]", line);
     if (line.startsWith(WUID)) {
       workUnit = line.substring(WUID.length()).trim();
       log.trace("WUID [{}]", workUnit);
