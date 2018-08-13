@@ -107,6 +107,7 @@ class JobStatusParser extends DfuplusOutputParser {
   // D:\hpcc\5.4.2\clienttools\bin>dfuplus.exe action=status server=http://192.168.56.102:8010 wuid=D20160607-132253
   // D20160607-132253 status: failed - Total time taken 5m 14s, Average transfer 154596KB/sec @Override
   protected void processLine(String line, int logLevel) {
+    log.trace("Processing Line [{}]", line);
     JobStatus oldStatus = jobStatus;
     for (String key : workUnitMap.keySet()) {
       if (line.startsWith(key)) {
