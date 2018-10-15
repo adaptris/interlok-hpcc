@@ -62,7 +62,8 @@ public class ListLogicalFiles extends RequestOnlyImpl {
       commandLine.addArgument(String.format("name=%s", dest));
       log.trace("Executing {}", commandLine);
       try (PrintWriter out = new PrintWriter(msg.getWriter())) {
-        ListLogicalFilesOutput parser = new ListLogicalFilesOutput(dest, out);
+        // parser is closed as part of the execution
+        ListLogicalFilesOutput parser = new ListLogicalFilesOutput(dest, out); // lgtm [java/output-resource-leak]
         executeInternal(commandLine, parser);
       }
     } catch (Exception e) {
