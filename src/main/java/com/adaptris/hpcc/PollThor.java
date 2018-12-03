@@ -75,7 +75,7 @@ public class PollThor extends RequestOnlyImpl {
       commandLine.addArgument("action=list");
       commandLine.addArgument(String.format("name=%s", dest));
       log.trace("Executing {}", commandLine);
-      ListOutputParser parser = new ListOutputParser(dest);
+      ListOutputParser parser = new ListOutputParser(dest); // lgtm [java/output-resource-leak]
       fileCheckStatus = executor.submit(new WaitForFile(parser, commandLine, dest));
       fileCheckStatus.get(maxWaitMs(), TimeUnit.MILLISECONDS);
     }
@@ -114,7 +114,7 @@ public class PollThor extends RequestOnlyImpl {
           throw new ProduceException("Errors executing dfuplus");
         }
         if (!outputParser.found()) {
-          log.trace("[{}] not found, retrying", filespec, sleepyTime);
+          log.trace("[{}] not found, retrying", filespec);
           TimeUnit.MILLISECONDS.sleep(sleepyTime);
           sleepyTime = calculateWait(sleepyTime);
         } else {
