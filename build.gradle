@@ -23,7 +23,7 @@ ext {
   componentName='Interlok/HPCC Integration'
   organizationName = "Adaptris Ltd"
   organizationUrl = "http://interlok.adaptris.net"
-  slf4jVersion = '1.7.27'
+  slf4jVersion = '1.7.28'
   log4j2Version = '2.12.1'
 }
 
@@ -90,6 +90,8 @@ dependencies {
   compile ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
   compile ("org.slf4j:slf4j-api:$slf4jVersion")
   compile ("org.apache.commons:commons-exec:1.3")
+  compile ("oro:oro:2.0.8")
+
 
   umlDoclet("nl.talsmasoftware:umldoclet:1.1.4")
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
