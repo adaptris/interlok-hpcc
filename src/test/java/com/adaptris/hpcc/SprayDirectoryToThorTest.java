@@ -21,8 +21,9 @@ import com.adaptris.core.StandaloneProducer;
 
 public class SprayDirectoryToThorTest extends ProducerCase {
 
-  public SprayDirectoryToThorTest(String name) {
-    super(name);
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
   }
 
   @Override

@@ -21,8 +21,9 @@ import com.adaptris.core.StandaloneRequestor;
 
 public class PollThorTest extends ProducerCase {
 
-  public PollThorTest(String name) {
-    super(name);
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
   }
 
   @Override

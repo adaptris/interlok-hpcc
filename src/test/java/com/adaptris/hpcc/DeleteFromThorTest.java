@@ -21,8 +21,9 @@ import com.adaptris.core.StandaloneRequestor;
 
 public class DeleteFromThorTest extends ProducerCase {
 
-  public DeleteFromThorTest(String name) {
-    super(name);
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
   }
 
   @Override

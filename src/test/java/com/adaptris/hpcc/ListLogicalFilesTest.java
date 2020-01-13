@@ -21,8 +21,9 @@ import com.adaptris.core.StandaloneRequestor;
 
 public class ListLogicalFilesTest extends ProducerCase {
 
-  public ListLogicalFilesTest(String name) {
-    super(name);
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
   }
 
   @Override
