@@ -90,6 +90,8 @@ configurations {
   all*.exclude group: 'org.codehaus.woodstox'
   all*.exclude group: 'org.eclipse.jetty.orbit', module: 'javax.mail.glassfish'
   all*.exclude group: 'com.fasterxml.woodstox'
+  // INTERLOK-3197 exclude old javax.mail
+  all*.exclude group: 'com.sun.mail', module: 'javax.mail'
   // Remove some guava dependencies
   all*.exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
   all*.exclude group: 'com.google.j2objc', module: 'j2objc-annotations'
