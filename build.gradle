@@ -92,6 +92,9 @@ configurations {
   all*.exclude group: 'com.fasterxml.woodstox'
   // INTERLOK-3197 exclude old javax.mail
   all*.exclude group: 'com.sun.mail', module: 'javax.mail'
+  all*.exclude group: 'javax.validation', module: 'validation-api'
+  all*.exclude group: 'javax.activation', module: 'activation'
+  all*.exclude group: 'javax.activation', module: 'javax.activation-api'
   // Remove some guava dependencies
   all*.exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
   all*.exclude group: 'com.google.j2objc', module: 'j2objc-annotations'
