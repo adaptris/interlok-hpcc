@@ -24,7 +24,6 @@ ext {
   organizationName = "Adaptris Ltd"
   organizationUrl = "http://interlok.adaptris.net"
   slf4jVersion = '1.7.30'
-  log4j2Version = '2.13.2'
 }
 
 ext.hasGraphViz = { ->
@@ -121,10 +120,13 @@ dependencies {
 
   testCompile ('junit:junit:4.13')
   testCompile ('org.mockito:mockito-all:1.10.19')
-  testCompile ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing= true }
-  testCompile ("org.apache.logging.log4j:log4j-core:$log4j2Version")
-  testCompile ("org.apache.logging.log4j:log4j-1.2-api:$log4j2Version")
-  testCompile ("org.apache.logging.log4j:log4j-api:$log4j2Version")
+  testCompile "org.slf4j:slf4j-simple:$slf4jVersion"
+  // exclude any log4j dependencies so that we can just use slf4j simple.
+  // works around INTERLOk-3233
+  testCompile "com.adaptris:interlok-stubs:$interlokCoreVersion", {
+    changing= true
+    exclude group: "org.apache.logging.log4j"
+  }
 
   javadoc("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
   offlineJavadocPackages ("com.adaptris:interlok-core:$interlokCoreVersion:javadoc@jar") { changing= true}
@@ -312,4 +314,3 @@ spotbugsTest.enabled = false
 
 check.dependsOn jacocoTestReport
 javadoc.dependsOn offlinePackageList,umlJavadoc
-
