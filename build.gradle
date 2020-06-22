@@ -277,6 +277,7 @@ publishing {
         properties.appendNode("tags", "hpcc")
         properties.appendNode("license", "false")
         properties.appendNode("externalUrl", "https://hpccsystems.com")
+        properties.appendNode("repository", "https://github.com/adaptris/interlok-hpcc")
       }
     }
   }
