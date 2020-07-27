@@ -1,12 +1,12 @@
 /*
  * Copyright 2016 Adaptris Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,95 +15,71 @@
 */
 package com.adaptris.hpcc;
 
+import static com.adaptris.core.util.DestinationHelper.logWarningIfNotNull;
+import static com.adaptris.core.util.DestinationHelper.mustHaveEither;
 import java.io.IOException;
-
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import org.apache.commons.exec.CommandLine;
-import org.hibernate.validator.constraints.NotBlank;
-
+import org.apache.commons.lang3.BooleanUtils;
+import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.annotation.InputFieldHint;
+import com.adaptris.annotation.Removal;
 import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.core.CoreException;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.Args;
+import com.adaptris.core.util.DestinationHelper;
+import com.adaptris.core.util.LoggingHelper;
 import com.adaptris.security.exc.PasswordException;
+import lombok.Getter;
+import lombok.Setter;
 
 public abstract class SprayToThorImpl extends DfuPlusWrapper {
 
   @NotBlank
   @InputFieldHint(expression = true)
+  @Getter
+  @Setter
   private String cluster;
+
+  @Getter
+  @Setter
+  @InputFieldDefault(value = "false")
   private Boolean overwrite;
 
+  /**
+   * The destination represents the file will be written to.
+   *
+   */
+  @Getter
+  @Setter
+  @Deprecated
+  @Valid
+  @Removal(version = "4.0.0", message = "Use 'logical-filename' instead")
+  private ProduceDestination destination;
 
   /**
-   * @see com.adaptris.core.AdaptrisMessageProducerImp #produce(AdaptrisMessage, ProduceDestination)
+   * The filename to write in Thor
+   *
    */
-  @Override
-  public void produce(AdaptrisMessage msg) throws ProduceException {
-    produce(msg, getDestination());
-  }
+  @InputFieldHint(expression = true)
+  @Getter
+  @Setter
+  // Needs to be @NotBlank when destination is removed.
+  private String logicalFilename;
 
-  /**
-   * UnsupportedOperationException is thrown
-   * 
-   * @see com.adaptris.core.AdaptrisMessageProducerImp#request(AdaptrisMessage)
-   */
+  private transient boolean destWarning;
+
   @Override
-  public final AdaptrisMessage request(AdaptrisMessage msg) throws ProduceException {
+  protected AdaptrisMessage doRequest(AdaptrisMessage msg, String endpoint, long timeout)
+      throws ProduceException {
     throw new UnsupportedOperationException("Request Reply is not supported");
   }
 
-  /**
-   * UnsupportedOperationException is thrown
-   * 
-   * @see com.adaptris.core.AdaptrisMessageProducerImp#request(AdaptrisMessage, long)
-   */
-  @Override
-  public final AdaptrisMessage request(AdaptrisMessage msg, long timeout) throws ProduceException {
-    throw new UnsupportedOperationException("Request Reply is not supported");
-  }
-
-  /**
-   * UnsupportedOperationException is thrown
-   * 
-   * @see com.adaptris.core.AdaptrisMessageProducerImp
-   *      #request(AdaptrisMessage,ProduceDestination)
-   */
-  @Override
-  public final AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination) throws ProduceException {
-    throw new UnsupportedOperationException("Request Reply is not supported");
-  }
-
-  /**
-   * UnsupportedOperationException is thrown
-   * 
-   * @see com.adaptris.core.AdaptrisMessageProducerImp #request(AdaptrisMessage,
-   *      ProduceDestination, long)
-   */
-  @Override
-  public final AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination, long timeout) throws ProduceException {
-    throw new UnsupportedOperationException("Request Reply is not supported");
-  }
-
-
-  public String getCluster() {
-    return cluster;
-  }
-
-  public void setCluster(String cluster) {
-    this.cluster = Args.notBlank(cluster, "cluster");
-  }
-
-  public Boolean getOverwrite() {
-    return overwrite;
-  }
-
-  public void setOverwrite(Boolean overwrite) {
-    this.overwrite = overwrite;
-  }
-  
-  boolean overwrite() {
-    return getOverwrite() != null ? getOverwrite().booleanValue() : false;
+  protected boolean overwrite() {
+    return BooleanUtils.toBooleanDefaultIfNull(getOverwrite(), false);
   }
 
   protected CommandLine createSprayCommand(AdaptrisMessage msg) throws PasswordException, IOException {
@@ -115,4 +91,19 @@ public abstract class SprayToThorImpl extends DfuPlusWrapper {
     return cmdLine;
   }
 
+
+  @Override
+  public void prepare() throws CoreException {
+    logWarningIfNotNull(destWarning, () -> destWarning = true, getDestination(),
+        "{} uses destination, use 'logical-filename' instead", LoggingHelper.friendlyName(this));
+    mustHaveEither(getLogicalFilename(), getDestination());
+    Args.notBlank(getCluster(), "cluster");
+    super.prepare();
+  }
+
+
+  @Override
+  public String endpoint(AdaptrisMessage msg) throws ProduceException {
+    return DestinationHelper.resolveProduceDestination(getLogicalFilename(), getDestination(), msg);
+  }
 }

@@ -1,12 +1,12 @@
 /*
  * Copyright 2016 Adaptris Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,11 +19,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.apache.commons.exec.CommandLine;
-
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
+import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageProducerImp;
 import com.adaptris.core.ProduceDestination;
@@ -31,6 +30,7 @@ import com.adaptris.core.ProduceException;
 import com.adaptris.core.StandaloneRequestor;
 import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import lombok.NoArgsConstructor;
 
 /**
  * Poll Thor for the existence of a logical file.
@@ -44,20 +44,19 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * methods will throw a {@link UnsupportedOperationException}. It should be used as part of a {@link StandaloneRequestor} where the
  * {@link ProduceDestination} returns the logical filename of the file that you wish to retrieve.
  * </p>
- * 
+ *
  * @config poll-thor
  */
 @XStreamAlias("poll-thor")
 @AdapterComponent
 @ComponentProfile(summary = "Poll HPCC for the existence of a logical file", tag = "producer,hpcc,dfuplus,thor",
     recommended = {DfuplusConnection.class})
-public class PollThor extends RequestOnlyImpl {
+@DisplayOrder(order = {"logicalFilename"})
+@NoArgsConstructor
+public class PollThor extends SingleFileRequest {
 
   private transient Future<Void> fileCheckStatus = null;
 
-  public PollThor() {
-
-  }
 
   @Override
   public void stop() {
@@ -66,17 +65,17 @@ public class PollThor extends RequestOnlyImpl {
     }
     fileCheckStatus = null;
   }
-  
+
   @Override
-  public AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination, long timeoutMs) throws ProduceException {
+  protected AdaptrisMessage doRequest(AdaptrisMessage msg, String endpoint, long timeoutMs)
+      throws ProduceException {
     try {
-      String dest = destination.getDestination(msg);
       CommandLine commandLine = retrieveConnection(DfuplusConnection.class).createCommand();
       commandLine.addArgument("action=list");
-      commandLine.addArgument(String.format("name=%s", dest));
+      commandLine.addArgument(String.format("name=%s", endpoint));
       log.trace("Executing {}", commandLine);
-      ListOutputParser parser = new ListOutputParser(dest); // lgtm [java/output-resource-leak]
-      fileCheckStatus = executor.submit(new WaitForFile(parser, commandLine, dest));
+      ListOutputParser parser = new ListOutputParser(endpoint); // lgtm [java/output-resource-leak]
+      fileCheckStatus = executor.submit(new WaitForFile(parser, commandLine, endpoint));
       fileCheckStatus.get(maxWaitMs(), TimeUnit.MILLISECONDS);
     }
     catch (AbortJobException | InterruptedException | TimeoutException e) {
@@ -100,7 +99,7 @@ public class PollThor extends RequestOnlyImpl {
     WaitForFile(ListOutputParser initialStatus, CommandLine commandline, String filespec) {
       this.filespec = filespec;
       outputParser = initialStatus;
-      this.cmd = commandline;
+      cmd = commandline;
       threadName = Thread.currentThread().getName();
     }
 

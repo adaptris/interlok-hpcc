@@ -1,12 +1,12 @@
 /*
  * Copyright 2016 Adaptris Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,13 +16,10 @@
 package com.adaptris.hpcc;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import java.io.File;
 import java.io.IOException;
-
+import javax.validation.constraints.NotBlank;
 import org.apache.commons.exec.CommandLine;
-import org.hibernate.validator.constraints.NotBlank;
-
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
@@ -44,8 +41,8 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * have the key fields (namely server/username/password) wrapped as a connection so that it is configurable as a
  * {@link SharedConnection} which means less boilerplate configuration in the future.
  * </p>
- * 
- * 
+ *
+ *
  * @author lchan
  * @config dfuplus-connection
  */
@@ -83,7 +80,7 @@ public class DfuplusConnection extends NoOpConnection {
   }
 
   public void setDfuplusCommand(String s) {
-    this.dfuplusCommand = Args.notBlank(s, "dfuplusCommand");
+    dfuplusCommand = Args.notBlank(s, "dfuplusCommand");
   }
 
   public String getServer() {
@@ -115,7 +112,7 @@ public class DfuplusConnection extends NoOpConnection {
     CommandLine cmdLine = new CommandLine(dfuPlus.getCanonicalPath());
     return addArguments(cmdLine);
   }
-  
+
   public CommandLine addArguments(CommandLine cmdLine) throws PasswordException {
     cmdLine.addArgument(String.format("server=%s", getServer()));
     if (!isBlank(getUsername())) {
@@ -161,7 +158,7 @@ public class DfuplusConnection extends NoOpConnection {
   /**
    * Set the IP address for the local machine (useful on multi-homed machines where the automatic detection guesses wrong) which is
    * equivalent to using {@code srcip=} parameter.
-   * 
+   *
    * @param sourceIp the source IP.
    */
   public void setSourceIp(String sourceIp) {
@@ -177,11 +174,11 @@ public class DfuplusConnection extends NoOpConnection {
 
   /**
    * Maps to the {@code transferbuffersize} argument.
-   * 
+   *
    * @param i the transferBufferSize to set; if not specified, will not be passed as an argument.
    */
   public void setTransferBufferSize(Integer i) {
-    this.transferBufferSize = i;
+    transferBufferSize = i;
   }
 
   /**
@@ -193,15 +190,15 @@ public class DfuplusConnection extends NoOpConnection {
 
   /**
    * Maps to the {@code throttle} argument.
-   * 
+   *
    * @param i the throttle to set; if not specified, will not be passed as an argument.
    */
   public void setThrottle(Integer i) {
-    this.throttle = i;
+    throttle = i;
   }
 
   /**
-   * 
+   *
    * @return the replicate
    */
   public Boolean getReplicate() {
@@ -210,11 +207,11 @@ public class DfuplusConnection extends NoOpConnection {
 
   /**
    * Maps to the {@code replicate} argument.
-   * 
+   *
    * @param b true/false, if not specified, will not be passed as an argument.
    */
   public void setReplicate(Boolean b) {
-    this.replicate = b;
+    replicate = b;
   }
 
   /**
@@ -226,11 +223,11 @@ public class DfuplusConnection extends NoOpConnection {
 
   /**
    * Maps to the {@code norecover} argument.
-   * 
+   *
    * @param b true/false, if not specified, will not be passed as an argument.
    */
   public void setNoRecover(Boolean b) {
-    this.noRecover = b;
+    noRecover = b;
   }
 
 

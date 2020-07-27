@@ -1,12 +1,12 @@
 /*
  * Copyright 2016 Adaptris Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,8 +15,8 @@
 */
 package com.adaptris.hpcc;
 
+import static com.adaptris.core.util.DestinationHelper.resolveProduceDestination;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
@@ -28,29 +28,31 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import javax.validation.Valid;
-
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
-
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.InputFieldDefault;
+import com.adaptris.annotation.Removal;
+import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageProducerImp;
 import com.adaptris.core.CoreException;
+import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.core.util.ManagedThreadFactory;
 import com.adaptris.hpcc.DfuplusOutputParser.JobStatus;
 import com.adaptris.security.exc.PasswordException;
 import com.adaptris.util.TimeInterval;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Base class for {@code dfuplus} based activities.
- * 
+ *
  * @author lchan
  *
  */
@@ -60,14 +62,32 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
   private static final TimeInterval EXEC_TIMEOUT_INTERVAL = new TimeInterval(5L, TimeUnit.MINUTES);
   private static final TimeInterval MAX_WAIT = new TimeInterval(1L, TimeUnit.HOURS);
 
+  /**
+   * Set the monitor interval between attempts to query job status.
+   * <p>
+   * If not specified, then it defaults to 30 seconds
+   * </p>
+   *
+   */
   @Valid
   @AdvancedConfig
   @InputFieldDefault(value = "30 seconds")
+  @Getter
+  @Setter
   private TimeInterval monitorInterval;
 
+  /**
+   * Set the max wait for a workunit to complete.
+   *
+   * <p>
+   * if not specified, defaults to 1 hour.
+   * </p>
+   */
   @Valid
   @AdvancedConfig
   @InputFieldDefault(value = "1 hour")
+  @Getter
+  @Setter
   private TimeInterval maxWait;
 
   private transient Calendar nextLogEvent = null;
@@ -104,45 +124,61 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
   public void prepare() throws CoreException {
   }
 
-
-  /**
-   * @return the timeout
-   */
-  public TimeInterval getMonitorInterval() {
-    return monitorInterval;
+  @Override
+  public final void produce(AdaptrisMessage msg) throws ProduceException {
+    doProduce(msg, endpoint(msg));
   }
 
   /**
-   * Set the monitor interval between attempts to query job status.
-   * <p>
-   * If not specified, then it defaults to 30 seconds
-   * </p>
-   * 
-   * @param t the monitor interval to set, if not specified defaults to 30 seconds.
+   *
+   * @deprecated since 3.11.0 {@link ProduceDestination} is deprecated
    */
-  public void setMonitorInterval(TimeInterval t) {
-    this.monitorInterval = t;
+  @Deprecated
+  @Removal(version = "4.0")
+  @Override
+  public final void produce(AdaptrisMessage msg, ProduceDestination destination)
+      throws ProduceException {
+    doProduce(msg, resolveProduceDestination(endpoint(msg), destination, msg));
   }
+
+  protected abstract void doProduce(AdaptrisMessage msg, String endpoint) throws ProduceException;
+
+  @Override
+  public final AdaptrisMessage request(AdaptrisMessage msg) throws ProduceException {
+    return request(msg, monitorIntervalMs());
+  }
+
+  @Override
+  public final AdaptrisMessage request(AdaptrisMessage msg, long timeout) throws ProduceException {
+    return doRequest(msg, endpoint(msg), timeout);
+  }
+
+  @Override
+  @Deprecated
+  @Removal(version = "4.0")
+  public final AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination)
+      throws ProduceException {
+    return request(msg, destination, monitorIntervalMs());
+  }
+
+  @Override
+  @Deprecated
+  @Removal(version = "4.0")
+  public final AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination,
+      long timeout) throws ProduceException {
+    return doRequest(msg, resolveProduceDestination(endpoint(msg), destination, msg), timeout);
+  }
+
+  protected abstract AdaptrisMessage doRequest(AdaptrisMessage msg, String endpoint, long timeout)
+      throws ProduceException;
+
 
   protected long monitorIntervalMs() {
-    return getMonitorInterval() != null ? getMonitorInterval().toMilliseconds() : MONITOR_INTERVAL.toMilliseconds();
-  }
-
-  public TimeInterval getMaxWait() {
-    return maxWait;
-  }
-
-  /**
-   * Set the max wait for a workunit to complete.
-   * 
-   * @param maxWait the max wait, if not specified, defaults to 1 hour.
-   */
-  public void setMaxWait(TimeInterval maxWait) {
-    this.maxWait = maxWait;
+    return TimeInterval.toMillisecondsDefaultIfNull(getMonitorInterval(), MONITOR_INTERVAL);
   }
 
   protected long maxWaitMs() {
-    return getMaxWait() != null ? getMaxWait().toMilliseconds() : MAX_WAIT.toMilliseconds();
+    return TimeInterval.toMillisecondsDefaultIfNull(getMaxWait(), MAX_WAIT);
   }
 
   protected void execute(CommandLine cmdLine) throws ProduceException {
@@ -279,7 +315,7 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     private String workUnit;
     private JobStatus status;
     private String threadName;
-    
+
     WaitForWorkUnit(JobStatus initialStatus, String wuid) {
       workUnit = wuid;
       status = initialStatus;

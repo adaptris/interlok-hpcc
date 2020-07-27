@@ -1,12 +1,11 @@
 package com.adaptris.hpcc.arguments;
 
+import javax.validation.constraints.NotBlank;
+import org.apache.commons.exec.CommandLine;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.util.Args;
-import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import org.apache.commons.exec.CommandLine;
-import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * SprayFormat implementation that allows the configuration of command specific arguments for
