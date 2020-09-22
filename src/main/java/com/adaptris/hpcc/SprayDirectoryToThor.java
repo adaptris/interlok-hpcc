@@ -1,12 +1,12 @@
 /*
  * Copyright 2016 Adaptris Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,28 +16,27 @@
 package com.adaptris.hpcc;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import java.io.File;
-
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
-import org.hibernate.validator.constraints.NotBlank;
-
+import org.apache.commons.lang3.BooleanUtils;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
+import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.annotation.InputFieldHint;
+import com.adaptris.annotation.Removal;
 import com.adaptris.core.AdaptrisMessage;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
-import com.adaptris.core.util.Args;
 import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Spray the contents of a directory to Thor.
- * 
+ *
  * <p>
  * Note that this producer <strong>ignores</strong> the current message contents and just sprays the contents of the directory
  * specified by {@link #getSourceDirectoryKey()} using the configured dfuplus command.
@@ -45,7 +44,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * <p>
  * Effectively, the program executed is going to similar to
  * <pre>
- * {@code 
+ * {@code
       dfuplus action=spray srcfile=/path/to/dir/*
         dstcluster=mythor dstname=~zzlc:json:data overwrite=1 PREFIX=FILENAME,FILESIZE
         server= nosplit=1 username= password=
@@ -57,7 +56,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * The adapter also needs a running {@code dfuplus action=dafilesrv} instance on the machine where the adapter is hosted. Thor will
  * connect to this instance for file delivery.
  * </p>
- * 
+ *
  * @author lchan
  * @config spray-directory-to-thor
  *
@@ -66,20 +65,50 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @AdapterComponent
 @ComponentProfile(summary = "Spray a directory into HPCC via dfuplus", tag = "producer,hpcc,dfuplus",
     recommended = {DfuplusConnection.class})
-@DisplayOrder(order = {"cluster", "sourceDirectoryKey", "overwrite"})
+@DisplayOrder(
+    order = {"logicalFilename", "cluster", "sourceDirectory", "sourceDirectoryKey", "overwrite"})
 public class SprayDirectoryToThor extends SprayToThorImpl {
 
+  /**
+   * Optional prefix.
+   *
+   */
+  @Getter
+  @Setter
   private String prefix;
-  @NotBlank
+  /**
+   * The source directory to spray into Thor.
+   *
+   */
+  @Getter
+  @Setter
   @InputFieldHint(expression = true)
   private String sourceDirectory;
+  /**
+   * Set the metadata containing the source directory to upload.
+   *
+   * @deprecated since 3.6.6 use {@link #setSourceDirectory(String)} instead.
+   */
   @Deprecated
+  @Removal(version = "3.12.0", message = "use 'source-directory' instead")
+  @Getter
+  @Setter
   private String sourceDirectoryKey;
-  @AdvancedConfig
+  /**
+   * Specify true to delete the source directory after successfully spray into HPCC.
+   * <p>
+   * The default is false if not explicitly specified
+   * </p>
+   */
+  @AdvancedConfig(rare = true)
+  @Getter
+  @Setter
+  @InputFieldDefault(value = "false")
   private Boolean deleteSourceDirectory;
 
   @Override
-  public void produce(AdaptrisMessage msg, ProduceDestination destination) throws ProduceException {
+  protected void doProduce(AdaptrisMessage msg, String endpoint)
+      throws ProduceException {
     int exit = 0;
     // Create DFU command
     // dfuplus action=spray srcfile=/var/lib/HPCCSystems/mydropzone/historical-weather/adapter-agility-historic-out/*
@@ -88,7 +117,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
     try {
       CommandLine commandLine = createSprayCommand(msg);
       commandLine.addArgument(String.format("srcfile=%s", getSource(msg)));
-      commandLine.addArgument(String.format("dstname=%s", destination.getDestination(msg)));
+      commandLine.addArgument(String.format("dstname=%s", endpoint));
       if (!isBlank(getPrefix())) {
         commandLine.addArgument(String.format("PREFIX=%s", getPrefix()));
       }
@@ -101,39 +130,6 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
     }
   }
 
-  /**
-   * @return the prefix
-   */
-  public String getPrefix() {
-    return prefix;
-  }
-
-  /**
-   * @param s the prefix to set
-   */
-  public void setPrefix(String s) {
-    this.prefix = s;
-  }
-
-  /**
-   * @return the sourceDirectoryKey
-   * @deprecated since 3.6.6 use {@link #getSourceDirectory()} instead.
-   */
-  @Deprecated
-  public String getSourceDirectoryKey() {
-    return sourceDirectoryKey;
-  }
-
-  /**
-   * Set the metadata containing the source directory to upload.
-   * 
-   * @param s the sourceDirectoryKey to set
-   * @deprecated since 3.6.6 use {@link #setSourceDirectory(String)} instead.
-   */
-  @Deprecated
-  public void setSourceDirectoryKey(String s) {
-    this.sourceDirectoryKey = s;
-  }
 
   private String getSource(AdaptrisMessage msg) throws Exception {
     String result = "";
@@ -162,36 +158,8 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
     }
   }
 
-  /**
-   * @return the deleteSourceDirectory
-   */
-  public Boolean getDeleteSourceDirectory() {
-    return deleteSourceDirectory;
-  }
-
-  /**
-   * Whether or not to delete the source directory after uploading (if there are no errors).
-   * 
-   * @param b true to delete the source directory after processing; default if not configured is false.
-   */
-  public void setDeleteSourceDirectory(Boolean b) {
-    this.deleteSourceDirectory = b;
-  }
-
   private boolean deleteSourceDirectory() {
-    return getDeleteSourceDirectory() != null ? getDeleteSourceDirectory().booleanValue() : false;
+    return BooleanUtils.toBooleanDefaultIfNull(getDeleteSourceDirectory(), false);
   }
 
-  public String getSourceDirectory() {
-    return sourceDirectory;
-  }
-
-  /**
-   * Set the source directory.
-   * 
-   * @param dir the source directory.
-   */
-  public void setSourceDirectory(String dir) {
-    this.sourceDirectory = Args.notBlank(dir, "sourceDirectory");
-  }
 }

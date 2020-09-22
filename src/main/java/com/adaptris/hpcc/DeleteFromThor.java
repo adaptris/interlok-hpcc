@@ -1,12 +1,12 @@
 /*
  * Copyright 2016 Adaptris Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,9 +17,9 @@ package com.adaptris.hpcc;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.LogOutputStream;
-
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
+import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageProducerImp;
 import com.adaptris.core.ProduceDestination;
@@ -27,43 +27,39 @@ import com.adaptris.core.ProduceException;
 import com.adaptris.core.StandaloneRequestor;
 import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import lombok.NoArgsConstructor;
 
 /**
  * Delete a logical file from Thor.
- * 
+ *
  * <p>
  * Note that although this is an implementation of {@link AdaptrisMessageProducerImp} the {@code AdaptrisMessageProducer#produce()}
  * methods will throw a {@link UnsupportedOperationException}. It should be used as part of a {@link StandaloneRequestor} where the
  * {@link ProduceDestination} returns the logical filename mask of the file(s) that you wish to retrieve.
  * </p>
- * 
+ *
  * @config delete-from-thor
  */
 @XStreamAlias("delete-from-thor")
 @AdapterComponent
 @ComponentProfile(summary = "Delete a specific file from HPCC", tag = "producer,hpcc,dfuplus,thor",
     recommended = {DfuplusConnection.class})
-public class DeleteFromThor extends RequestOnlyImpl {
+@DisplayOrder(order = {"logicalFilename"})
+@NoArgsConstructor
+public class DeleteFromThor extends SingleFileRequest {
 
-  public DeleteFromThor() {
-
-  }
 
   @Override
-  public void stop() {
-  }
-  
-  @Override
-  public AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination, long timeoutMs) throws ProduceException {
+  public AdaptrisMessage doRequest(AdaptrisMessage msg, String endpoint,
+      long timeoutMs) throws ProduceException {
     try {
-      String dest = destination.getDestination(msg);
       CommandLine commandLine = retrieveConnection(DfuplusConnection.class).createCommand();
       commandLine.addArgument("action=remove");
-      commandLine.addArgument(String.format("name=%s", dest));
+      commandLine.addArgument(String.format("name=%s", endpoint));
       log.trace("Executing {}", commandLine);
       DeleteOutputParser p = new DeleteOutputParser();
       executeInternal(commandLine, p);
-      log.info("Delete on [{}]: {}", dest, p.actualState);
+      log.info("Delete on [{}]: {}", endpoint, p.actualState);
     }
     catch (AbortJobException e) {
       throw ExceptionHelper.wrapProduceException(generateExceptionMessage(e), e);

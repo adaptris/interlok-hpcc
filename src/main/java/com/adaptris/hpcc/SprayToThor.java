@@ -1,12 +1,12 @@
 /*
  * Copyright 2016 Adaptris Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,17 +17,15 @@ package com.adaptris.hpcc;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.FileUtils;
-
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
+import com.adaptris.annotation.Removal;
 import com.adaptris.core.AdaptrisMessage;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.lms.FileBackedMessage;
 import com.adaptris.core.util.ExceptionHelper;
@@ -36,12 +34,12 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
  * Spray the contents of the current message into Thor.
- * 
+ *
  * <p>
  * The adapter also needs a running {@code dfuplus action=dafilesrv} instance on the machine where the adapter is hosted. Thor will
  * connect to this instance for file delivery.
  * </p>
- * 
+ *
  * @author lchan
  * @config spray-to-thor
  *
@@ -50,7 +48,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @AdapterComponent
 @ComponentProfile(summary = "Spray the current message into HPCC via dfuplus", tag = "producer,hpcc,dfuplus",
     recommended = {DfuplusConnection.class})
-@DisplayOrder(order = {"cluster", "sprayFormat", "overwrite", "tempDirectory"})
+@DisplayOrder(order = {"logicalFilename", "cluster", "sprayFormat", "overwrite", "tempDirectory"})
 public class SprayToThor extends SprayToThorImpl {
 
   @Deprecated
@@ -62,20 +60,23 @@ public class SprayToThor extends SprayToThorImpl {
   private String tempDirectory;
 
   @Deprecated
+  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
   private FORMAT format;
   @Deprecated
+  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
   private Integer maxRecordSize;
 
   private transient final FileCleaningTracker tracker = new FileCleaningTracker();
-  
+
   @Override
-  public void produce(AdaptrisMessage msg, ProduceDestination destination) throws ProduceException {
+  protected void doProduce(AdaptrisMessage msg, String endpoint)
+      throws ProduceException {
     File sourceFile = saveFile(msg, msg);
     try {
       CommandLine commandLine = createSprayCommand(msg);
       addFormatArguments(commandLine);
       commandLine.addArgument(String.format("srcfile=%s", sourceFile.getCanonicalPath()));
-      commandLine.addArgument(String.format("dstname=%s", destination.getDestination(msg)));
+      commandLine.addArgument(String.format("dstname=%s", endpoint));
       log.trace("Executing {}", commandLine);
       execute(commandLine);
     } catch (Exception e) {
@@ -97,6 +98,7 @@ public class SprayToThor extends SprayToThorImpl {
    * @deprecated since 3.7 use {@link #getSprayFormat()} instead.
    */
   @Deprecated
+  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
   public FORMAT getFormat() {
     return format;
   }
@@ -105,6 +107,7 @@ public class SprayToThor extends SprayToThorImpl {
    * @deprecated since 3.7 use {@link #setSprayFormat(SprayFormat)} instead.
    */
   @Deprecated
+  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
   public void setFormat(FORMAT format) {
     this.format = format;
   }
@@ -113,6 +116,7 @@ public class SprayToThor extends SprayToThorImpl {
    * @deprecated since 3.7 use {@link #getSprayFormat()} instead.
    */
   @Deprecated
+  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
   public Integer getMaxRecordSize() {
     return maxRecordSize;
   }
@@ -121,6 +125,7 @@ public class SprayToThor extends SprayToThorImpl {
    * @deprecated since 3.7 use {@link #setSprayFormat(SprayFormat)} instead.
    */
   @Deprecated
+  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
   public void setMaxRecordSize(Integer maxRecordSize) {
     this.maxRecordSize = maxRecordSize;
   }
@@ -147,11 +152,11 @@ public class SprayToThor extends SprayToThorImpl {
 
   /**
    * If specified then messages that are not {@link FileBackedMessage} will be stored in this location prior to spray.
-   * 
+   *
    * @param tempDir the tempDir to set; default is null which defaults to {@code java.io.tmpdir}
    */
   public void setTempDirectory(String tempDir) {
-    this.tempDirectory = tempDir;
+    tempDirectory = tempDir;
   }
 
   private File saveFile(AdaptrisMessage msg, Object marker) throws ProduceException {
@@ -174,4 +179,5 @@ public class SprayToThor extends SprayToThorImpl {
     }
     return result;
   }
+
 }

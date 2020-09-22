@@ -1,12 +1,12 @@
 /*
  * Copyright 2016 Adaptris Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,7 +15,6 @@
 */
 package com.adaptris.hpcc;
 
-import com.adaptris.core.ConfiguredProduceDestination;
 import com.adaptris.core.ProducerCase;
 import com.adaptris.core.StandaloneRequestor;
 
@@ -35,7 +34,7 @@ public class DeleteFromThorTest extends ProducerCase {
     c.setPassword("myPassword");
 
     DeleteFromThor p = new DeleteFromThor();
-    p.setDestination(new ConfiguredProduceDestination("~test::file::to::delete"));
+    p.setLogicalFilename("~test::file::to::delete");
     return new StandaloneRequestor(c, p);
   }
 
