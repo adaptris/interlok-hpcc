@@ -68,7 +68,7 @@ public class ListLogicalFiles extends RequestOnlyImpl {
   @Setter
   @Deprecated
   @Valid
-  @ConfigDeprecated(version = "4.0.0", message = "Use 'filemask' instead", groups = Deprecated.class)
+  @ConfigDeprecated(removalVersion = "4.0.0", message = "Use 'filemask' instead", groups = Deprecated.class)
   private ProduceDestination destination;
 
   /**
