@@ -4,7 +4,7 @@ import static com.adaptris.core.util.DestinationHelper.logWarningIfNotNull;
 import static com.adaptris.core.util.DestinationHelper.mustHaveEither;
 import javax.validation.Valid;
 import com.adaptris.annotation.InputFieldHint;
-import com.adaptris.annotation.Removal;
+import com.adaptris.validation.constraints.ConfigDeprecated;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.ProduceDestination;
@@ -26,7 +26,7 @@ public abstract class SingleFileRequest extends RequestOnlyImpl {
   @Setter
   @Deprecated
   @Valid
-  @Removal(version = "4.0.0", message = "Use 'logical-filename' instead")
+  @ConfigDeprecated(removalVersion = "4.0.0", message = "Use 'logical-filename' instead", groups = Deprecated.class)
   private ProduceDestination destination;
 
   /**
