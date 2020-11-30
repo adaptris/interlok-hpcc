@@ -26,7 +26,7 @@ import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.annotation.InputFieldHint;
-import com.adaptris.annotation.Removal;
+import com.adaptris.validation.constraints.ConfigDeprecated;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.ExceptionHelper;
@@ -90,7 +90,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
    * @deprecated since 3.6.6 use {@link #setSourceDirectory(String)} instead.
    */
   @Deprecated
-  @Removal(version = "3.12.0", message = "use 'source-directory' instead")
+  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'source-directory' instead", groups = Deprecated.class)
   @Getter
   @Setter
   private String sourceDirectoryKey;

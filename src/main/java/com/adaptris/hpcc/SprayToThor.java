@@ -24,6 +24,7 @@ import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
+import com.adaptris.validation.constraints.ConfigDeprecated;
 import com.adaptris.annotation.Removal;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceException;
@@ -60,10 +61,10 @@ public class SprayToThor extends SprayToThorImpl {
   private String tempDirectory;
 
   @Deprecated
-  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
+  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
   private FORMAT format;
   @Deprecated
-  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
+  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
   private Integer maxRecordSize;
 
   private transient final FileCleaningTracker tracker = new FileCleaningTracker();
@@ -98,7 +99,7 @@ public class SprayToThor extends SprayToThorImpl {
    * @deprecated since 3.7 use {@link #getSprayFormat()} instead.
    */
   @Deprecated
-  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
+  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
   public FORMAT getFormat() {
     return format;
   }
@@ -116,7 +117,7 @@ public class SprayToThor extends SprayToThorImpl {
    * @deprecated since 3.7 use {@link #getSprayFormat()} instead.
    */
   @Deprecated
-  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
+  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
   public Integer getMaxRecordSize() {
     return maxRecordSize;
   }

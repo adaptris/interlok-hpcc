@@ -24,7 +24,7 @@ import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.annotation.InputFieldHint;
-import com.adaptris.annotation.Removal;
+import com.adaptris.validation.constraints.ConfigDeprecated;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageProducerImp;
 import com.adaptris.core.CoreException;
@@ -68,7 +68,7 @@ public class ListLogicalFiles extends RequestOnlyImpl {
   @Setter
   @Deprecated
   @Valid
-  @Removal(version = "4.0.0", message = "Use 'filemask' instead")
+  @ConfigDeprecated(removalVersion = "4.0.0", message = "Use 'filemask' instead", groups = Deprecated.class)
   private ProduceDestination destination;
 
   /**

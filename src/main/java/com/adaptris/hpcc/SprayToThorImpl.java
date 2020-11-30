@@ -24,7 +24,7 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.lang3.BooleanUtils;
 import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.annotation.InputFieldHint;
-import com.adaptris.annotation.Removal;
+import com.adaptris.validation.constraints.ConfigDeprecated;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.ProduceDestination;
@@ -57,7 +57,7 @@ public abstract class SprayToThorImpl extends DfuPlusWrapper {
   @Setter
   @Deprecated
   @Valid
-  @Removal(version = "4.0.0", message = "Use 'logical-filename' instead")
+  @ConfigDeprecated(removalVersion = "4.0.0", message = "Use 'logical-filename' instead", groups = Deprecated.class)
   private ProduceDestination destination;
 
   /**
