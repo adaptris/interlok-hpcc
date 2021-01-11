@@ -17,6 +17,7 @@ package com.adaptris.hpcc;
 
 import java.io.File;
 import java.io.IOException;
+import javax.validation.constraints.NotNull;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.FileUtils;
@@ -50,6 +51,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @DisplayOrder(order = {"logicalFilename", "cluster", "sprayFormat", "overwrite", "tempDirectory"})
 public class SprayToThor extends SprayToThorImpl {
 
+  @NotNull
   private SprayFormat sprayFormat;
 
   @AdvancedConfig
@@ -74,11 +76,7 @@ public class SprayToThor extends SprayToThorImpl {
   }
 
   void addFormatArguments(CommandLine commandLine){
-    if(getSprayFormat() == null) {
-      log.warn("spray-format is null");
-    } else {
-      getSprayFormat().addArguments(commandLine);
-    }
+    getSprayFormat().addArguments(commandLine);
   }
 
   public SprayFormat getSprayFormat() {
