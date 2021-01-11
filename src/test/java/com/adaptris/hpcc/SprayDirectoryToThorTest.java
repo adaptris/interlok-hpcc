@@ -15,6 +15,11 @@
 */
 package com.adaptris.hpcc;
 
+import static org.junit.Assert.assertNotNull;
+import java.io.File;
+import org.junit.Test;
+import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ProducerCase;
 import com.adaptris.core.StandaloneProducer;
 
@@ -40,5 +45,17 @@ public class SprayDirectoryToThorTest extends ProducerCase {
     p.setPrefix("FILENAME,FILESIZE");
     p.setSourceDirectory("%message{metadataKeyContainingDirectory}");
     return new StandaloneProducer(c, p);
+  }
+  
+  @Test
+  public void testGetSourceDir() throws Exception {
+    SprayDirectoryToThor p = new SprayDirectoryToThor();
+    p.setSourceDirectory("metadataKeyContainingDirectory");
+
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage();
+    msg.addMetadata("metadataKeyContainingDirectory", "test");
+
+    File f = p.getSourceDir(msg);
+    assertNotNull(f);
   }
 }

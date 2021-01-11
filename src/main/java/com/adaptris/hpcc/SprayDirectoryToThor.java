@@ -130,7 +130,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
     return result;
   }
 
-  private File getSourceDir(AdaptrisMessage msg) throws Exception {
+  public File getSourceDir(AdaptrisMessage msg) throws Exception {
     return new File(msg.resolve(getSourceDirectory()));
   }
 

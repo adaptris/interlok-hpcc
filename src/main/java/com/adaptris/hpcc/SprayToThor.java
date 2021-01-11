@@ -29,6 +29,7 @@ import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.lms.FileBackedMessage;
 import com.adaptris.core.util.ExceptionHelper;
+import com.adaptris.hpcc.arguments.FixedSprayFormat;
 import com.adaptris.hpcc.arguments.SprayFormat;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -52,7 +53,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 public class SprayToThor extends SprayToThorImpl {
 
   @NotNull
-  private SprayFormat sprayFormat;
+  private SprayFormat sprayFormat = new FixedSprayFormat(125);
 
   @AdvancedConfig
   private String tempDirectory;
