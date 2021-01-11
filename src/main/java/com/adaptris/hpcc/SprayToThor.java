@@ -24,8 +24,6 @@ import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
-import com.adaptris.validation.constraints.ConfigDeprecated;
-import com.adaptris.annotation.Removal;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.lms.FileBackedMessage;
@@ -52,20 +50,10 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @DisplayOrder(order = {"logicalFilename", "cluster", "sprayFormat", "overwrite", "tempDirectory"})
 public class SprayToThor extends SprayToThorImpl {
 
-  @Deprecated
-  public enum FORMAT { CSV, FIXED; }
-
   private SprayFormat sprayFormat;
 
   @AdvancedConfig
   private String tempDirectory;
-
-  @Deprecated
-  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
-  private FORMAT format;
-  @Deprecated
-  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
-  private Integer maxRecordSize;
 
   private transient final FileCleaningTracker tracker = new FileCleaningTracker();
 
@@ -87,53 +75,10 @@ public class SprayToThor extends SprayToThorImpl {
 
   void addFormatArguments(CommandLine commandLine){
     if(getSprayFormat() == null) {
-      log.warn("Use spray-format instead");
-      commandLine.addArgument(String.format("format=%s", getFormat().name().toLowerCase()));
-      commandLine.addArgument(String.format("maxrecordsize=%d", maxRecordSize()));
+      log.warn("spray-format is null");
     } else {
       getSprayFormat().addArguments(commandLine);
     }
-  }
-
-  /**
-   * @deprecated since 3.7 use {@link #getSprayFormat()} instead.
-   */
-  @Deprecated
-  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
-  public FORMAT getFormat() {
-    return format;
-  }
-
-  /**
-   * @deprecated since 3.7 use {@link #setSprayFormat(SprayFormat)} instead.
-   */
-  @Deprecated
-  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
-  public void setFormat(FORMAT format) {
-    this.format = format;
-  }
-
-  /**
-   * @deprecated since 3.7 use {@link #getSprayFormat()} instead.
-   */
-  @Deprecated
-  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
-  public Integer getMaxRecordSize() {
-    return maxRecordSize;
-  }
-
-  /**
-   * @deprecated since 3.7 use {@link #setSprayFormat(SprayFormat)} instead.
-   */
-  @Deprecated
-  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
-  public void setMaxRecordSize(Integer maxRecordSize) {
-    this.maxRecordSize = maxRecordSize;
-  }
-
-  @Deprecated
-  private int maxRecordSize() {
-    return getMaxRecordSize() != null ? getMaxRecordSize() : 8192;
   }
 
   public SprayFormat getSprayFormat() {

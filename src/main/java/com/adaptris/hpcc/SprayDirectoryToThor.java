@@ -76,6 +76,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
   @Getter
   @Setter
   private String prefix;
+  
   /**
    * The source directory to spray into Thor.
    *
@@ -84,16 +85,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
   @Setter
   @InputFieldHint(expression = true)
   private String sourceDirectory;
-  /**
-   * Set the metadata containing the source directory to upload.
-   *
-   * @deprecated since 3.6.6 use {@link #setSourceDirectory(String)} instead.
-   */
-  @Deprecated
-  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'source-directory' instead", groups = Deprecated.class)
-  @Getter
-  @Setter
-  private String sourceDirectoryKey;
+
   /**
    * Specify true to delete the source directory after successfully spray into HPCC.
    * <p>
@@ -139,15 +131,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
   }
 
   private File getSourceDir(AdaptrisMessage msg) throws Exception {
-    File dir = null;
-    if (!isBlank(getSourceDirectoryKey())) {
-      log.warn("source-directory-key is deprecated; use source-directory instead");
-      dir = new File(msg.getMetadataValue(getSourceDirectoryKey()));
-    }
-    else {
-      dir = new File(msg.resolve(getSourceDirectory()));
-    }
-    return dir;
+    return new File(msg.resolve(getSourceDirectory()));
   }
 
   private void postSprayCleanup(AdaptrisMessage msg) throws Exception {
