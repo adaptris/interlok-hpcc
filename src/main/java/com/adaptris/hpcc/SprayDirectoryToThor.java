@@ -90,7 +90,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
    * @deprecated since 3.6.6 use {@link #setSourceDirectory(String)} instead.
    */
   @Deprecated
-  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'source-directory' instead", groups = Deprecated.class)
+  @ConfigDeprecated(removalVersion = "4.0.0", message = "use 'source-directory' instead", groups = Deprecated.class)
   @Getter
   @Setter
   private String sourceDirectoryKey;
