@@ -61,10 +61,10 @@ public class SprayToThor extends SprayToThorImpl {
   private String tempDirectory;
 
   @Deprecated
-  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
+  @ConfigDeprecated(removalVersion = "4.0.0", message = "use 'spray-format' instead", groups = Deprecated.class)
   private FORMAT format;
   @Deprecated
-  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
+  @ConfigDeprecated(removalVersion = "4.0.0", message = "use 'spray-format' instead", groups = Deprecated.class)
   private Integer maxRecordSize;
 
   private transient final FileCleaningTracker tracker = new FileCleaningTracker();
@@ -99,7 +99,7 @@ public class SprayToThor extends SprayToThorImpl {
    * @deprecated since 3.7 use {@link #getSprayFormat()} instead.
    */
   @Deprecated
-  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
+  @ConfigDeprecated(removalVersion = "4.0.0", message = "use 'spray-format' instead", groups = Deprecated.class)
   public FORMAT getFormat() {
     return format;
   }
@@ -108,7 +108,7 @@ public class SprayToThor extends SprayToThorImpl {
    * @deprecated since 3.7 use {@link #setSprayFormat(SprayFormat)} instead.
    */
   @Deprecated
-  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
+  @Removal(version = "4.0.0", message = "use 'spray-format' instead")
   public void setFormat(FORMAT format) {
     this.format = format;
   }
@@ -117,7 +117,7 @@ public class SprayToThor extends SprayToThorImpl {
    * @deprecated since 3.7 use {@link #getSprayFormat()} instead.
    */
   @Deprecated
-  @ConfigDeprecated(removalVersion = "3.12.0", message = "use 'spray-format' instead", groups = Deprecated.class)
+  @ConfigDeprecated(removalVersion = "4.0.0", message = "use 'spray-format' instead", groups = Deprecated.class)
   public Integer getMaxRecordSize() {
     return maxRecordSize;
   }
@@ -126,7 +126,7 @@ public class SprayToThor extends SprayToThorImpl {
    * @deprecated since 3.7 use {@link #setSprayFormat(SprayFormat)} instead.
    */
   @Deprecated
-  @Removal(version = "3.12.0", message = "use 'spray-format' instead")
+  @Removal(version = "4.0.0", message = "use 'spray-format' instead")
   public void setMaxRecordSize(Integer maxRecordSize) {
     this.maxRecordSize = maxRecordSize;
   }
