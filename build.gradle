@@ -128,7 +128,7 @@ dependencies {
 
   testCompile ('junit:junit:4.13.1')
   testCompile ("org.mockito:mockito-core:3.7.0")
-  testCompile ("org.mockito:mockito-inline:3.7.0")
+  testCompile ("org.mockito:mockito-inline:3.7.7")
   testCompile "org.slf4j:slf4j-simple:$slf4jVersion"
   // exclude any log4j dependencies so that we can just use slf4j simple.
   // works around INTERLOk-3233
