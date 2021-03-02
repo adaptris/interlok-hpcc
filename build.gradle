@@ -31,6 +31,7 @@ ext {
   organizationName = "Adaptris Ltd"
   organizationUrl = "http://interlok.adaptris.net"
   slf4jVersion = '1.7.30'
+  mockitoVersion = '3.8.0'
 }
 
 ext.hasGraphViz = { ->
@@ -126,8 +127,9 @@ dependencies {
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
   testCompile ('junit:junit:4.13.2')
-  testCompile ("org.mockito:mockito-core:3.8.0")
-  testCompile ("org.mockito:mockito-inline:3.7.7")
+  testCompile ("org.mockito:mockito-core:$mockitoVersion")
+  testCompile ("org.mockito:mockito-inline:$mockitoVersion")
+
   testCompile "org.slf4j:slf4j-simple:$slf4jVersion"
   // exclude any log4j dependencies so that we can just use slf4j simple.
   // works around INTERLOk-3233
