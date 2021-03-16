@@ -25,7 +25,6 @@ import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageProducerImp;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.StandaloneRequestor;
 import com.adaptris.core.util.ExceptionHelper;
@@ -35,14 +34,16 @@ import lombok.NoArgsConstructor;
 /**
  * Poll Thor for the existence of a logical file.
  * <p>
- * The use case for this service is, if there is a long-running Job on Thor (scheduled or otherwise) that creates a logical file;
- * you need to wait for the existence of this file before carrying on with the rest of the adapter workflow (usually despraying
- * the logical file that was created).
+ * The use case for this service is, if there is a long-running Job on Thor (scheduled or otherwise)
+ * that creates a logical file; you need to wait for the existence of this file before carrying on
+ * with the rest of the adapter workflow (usually despraying the logical file that was created).
  * </p>
  * <p>
- * Note that although this is an implementation of {@link AdaptrisMessageProducerImp} the {@code AdaptrisMessageProducer#produce()}
- * methods will throw a {@link UnsupportedOperationException}. It should be used as part of a {@link StandaloneRequestor} where the
- * {@link ProduceDestination} returns the logical filename of the file that you wish to retrieve.
+ * Note that although this is an implementation of {@link AdaptrisMessageProducerImp} the
+ * {@code AdaptrisMessageProducer#produce()} methods will throw a
+ * {@link UnsupportedOperationException}. It should be used as part of a {@link StandaloneRequestor}
+ * where the {@link #getLogicalFilename()} returns the logical filename of the file that you wish to
+ * retrieve.
  * </p>
  *
  * @config poll-thor

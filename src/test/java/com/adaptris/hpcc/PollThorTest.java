@@ -15,15 +15,11 @@
 */
 package com.adaptris.hpcc;
 
-import com.adaptris.core.ProducerCase;
 import com.adaptris.core.StandaloneRequestor;
+import com.adaptris.interlok.junit.scaffolding.ExampleProducerCase;
 
-public class PollThorTest extends ProducerCase {
+public class PollThorTest extends ExampleProducerCase {
 
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
 
   @Override
   protected StandaloneRequestor retrieveObjectForSampleConfig() {

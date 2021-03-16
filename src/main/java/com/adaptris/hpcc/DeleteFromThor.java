@@ -22,7 +22,6 @@ import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageProducerImp;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.StandaloneRequestor;
 import com.adaptris.core.util.ExceptionHelper;
@@ -33,9 +32,11 @@ import lombok.NoArgsConstructor;
  * Delete a logical file from Thor.
  *
  * <p>
- * Note that although this is an implementation of {@link AdaptrisMessageProducerImp} the {@code AdaptrisMessageProducer#produce()}
- * methods will throw a {@link UnsupportedOperationException}. It should be used as part of a {@link StandaloneRequestor} where the
- * {@link ProduceDestination} returns the logical filename mask of the file(s) that you wish to retrieve.
+ * Note that although this is an implementation of {@link AdaptrisMessageProducerImp} the
+ * {@code AdaptrisMessageProducer#produce()} methods will throw a
+ * {@link UnsupportedOperationException}. It should be used as part of a {@link StandaloneRequestor}
+ * where the {@link #getLogicalFilename()} returns the logical filename mask of the file(s) that you
+ * wish to retrieve.
  * </p>
  *
  * @config delete-from-thor

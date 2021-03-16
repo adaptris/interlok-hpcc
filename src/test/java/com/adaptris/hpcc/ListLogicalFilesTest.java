@@ -15,15 +15,11 @@
 */
 package com.adaptris.hpcc;
 
-import com.adaptris.core.ProducerCase;
 import com.adaptris.core.StandaloneRequestor;
+import com.adaptris.interlok.junit.scaffolding.ExampleProducerCase;
 
-public class ListLogicalFilesTest extends ProducerCase {
+public class ListLogicalFilesTest extends ExampleProducerCase {
 
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
 
   @Override
   protected StandaloneRequestor retrieveObjectForSampleConfig() {

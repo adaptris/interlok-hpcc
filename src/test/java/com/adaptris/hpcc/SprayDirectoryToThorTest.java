@@ -15,15 +15,10 @@
 */
 package com.adaptris.hpcc;
 
-import com.adaptris.core.ProducerCase;
 import com.adaptris.core.StandaloneProducer;
+import com.adaptris.interlok.junit.scaffolding.ExampleProducerCase;
 
-public class SprayDirectoryToThorTest extends ProducerCase {
-
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
+public class SprayDirectoryToThorTest extends ExampleProducerCase {
 
   @Override
   protected StandaloneProducer retrieveObjectForSampleConfig() {

@@ -18,17 +18,13 @@ package com.adaptris.hpcc;
 import static org.junit.Assert.assertEquals;
 import org.apache.commons.exec.CommandLine;
 import org.junit.Test;
-import com.adaptris.core.ProducerCase;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.hpcc.arguments.CSVSprayFormat;
 import com.adaptris.hpcc.arguments.FixedSprayFormat;
+import com.adaptris.interlok.junit.scaffolding.ExampleProducerCase;
 
-public class SprayToThorTest extends ProducerCase {
+public class SprayToThorTest extends ExampleProducerCase {
 
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
 
   @Test
   public void testLegacyCsvFormat() throws Exception {
