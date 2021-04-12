@@ -15,25 +15,20 @@
 */
 package com.adaptris.hpcc;
 
-import static com.adaptris.core.util.DestinationHelper.logWarningIfNotNull;
-import static com.adaptris.core.util.DestinationHelper.mustHaveEither;
 import java.io.PrintWriter;
-import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import org.apache.commons.exec.CommandLine;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.annotation.InputFieldHint;
-import com.adaptris.validation.constraints.ConfigDeprecated;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageProducerImp;
 import com.adaptris.core.CoreException;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.StandaloneRequestor;
-import com.adaptris.core.util.DestinationHelper;
 import com.adaptris.core.util.ExceptionHelper;
-import com.adaptris.core.util.LoggingHelper;
+import com.adaptris.interlok.util.Args;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,12 +37,15 @@ import lombok.Setter;
 /**
  * Query Thor for a list of files.
  * <p>
- * This simply uses dfuplus to query Thor and get a list of logical files. The list replaces the existing message payload.
+ * This simply uses dfuplus to query Thor and get a list of logical files. The list replaces the
+ * existing message payload.
  * </p>
  * <p>
- * Note that although this is an implementation of {@link AdaptrisMessageProducerImp} the {@code AdaptrisMessageProducer#produce()}
- * methods will throw a {@link UnsupportedOperationException}. It should be used as part of a {@link StandaloneRequestor} where the
- * {@link ProduceDestination} returns the logical filename mask of the file(s) that you wish to retrieve.
+ * Note that although this is an implementation of {@link AdaptrisMessageProducerImp} the
+ * {@code AdaptrisMessageProducer#produce()} methods will throw a
+ * {@link UnsupportedOperationException}. It should be used as part of a {@link StandaloneRequestor}
+ * where the {@link #getFilemask()} returns the logical filename mask of the file(s) that you wish
+ * to retrieve.
  * </p>
  *
  * @config list-logical-files-in-thor
@@ -60,16 +58,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ListLogicalFiles extends RequestOnlyImpl {
 
-  /**
-   * The destination represents the file will be written to.
-   *
-   */
-  @Getter
-  @Setter
-  @Deprecated
-  @Valid
-  @ConfigDeprecated(removalVersion = "4.0.0", message = "Use 'filemask' instead", groups = Deprecated.class)
-  private ProduceDestination destination;
 
   /**
    * The filename to write in Thor
@@ -78,10 +66,8 @@ public class ListLogicalFiles extends RequestOnlyImpl {
   @InputFieldHint(expression = true)
   @Getter
   @Setter
-  // Needs to be @NotBlank when destination is removed.
+  @NotBlank
   private String filemask;
-
-  private transient boolean destWarning;
 
   @Override
   protected AdaptrisMessage doRequest(AdaptrisMessage msg, String filespec, long timeoutMs)
@@ -105,14 +91,12 @@ public class ListLogicalFiles extends RequestOnlyImpl {
 
   @Override
   public void prepare() throws CoreException {
-    logWarningIfNotNull(destWarning, () -> destWarning = true, getDestination(),
-        "{} uses destination, use 'filemask' instead", LoggingHelper.friendlyName(this));
-    mustHaveEither(getFilemask(), getDestination());
+    Args.notBlank(getFilemask(), "filemask");
     super.prepare();
   }
 
   @Override
   public String endpoint(AdaptrisMessage msg) throws ProduceException {
-    return DestinationHelper.resolveProduceDestination(getFilemask(), getDestination(), msg);
+    return msg.resolve(getFilemask());
   }
 }

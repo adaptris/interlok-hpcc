@@ -15,15 +15,10 @@
 */
 package com.adaptris.hpcc;
 
-import com.adaptris.core.ProducerCase;
 import com.adaptris.core.StandaloneRequestor;
+import com.adaptris.interlok.junit.scaffolding.ExampleProducerCase;
 
-public class DesprayFromThorTest extends ProducerCase {
-
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
+public class DesprayFromThorTest extends ExampleProducerCase {
 
   @Override
   protected StandaloneRequestor retrieveObjectForSampleConfig() {

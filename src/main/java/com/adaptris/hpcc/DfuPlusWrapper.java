@@ -15,7 +15,6 @@
 */
 package com.adaptris.hpcc;
 
-import static com.adaptris.core.util.DestinationHelper.resolveProduceDestination;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,11 +35,9 @@ import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.InputFieldDefault;
-import com.adaptris.annotation.Removal;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageProducerImp;
 import com.adaptris.core.CoreException;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.core.util.ManagedThreadFactory;
@@ -129,18 +126,6 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
     doProduce(msg, endpoint(msg));
   }
 
-  /**
-   *
-   * @deprecated since 3.11.0 {@link ProduceDestination} is deprecated
-   */
-  @Deprecated
-  @Removal(version = "4.0")
-  @Override
-  public final void produce(AdaptrisMessage msg, ProduceDestination destination)
-      throws ProduceException {
-    doProduce(msg, resolveProduceDestination(endpoint(msg), destination, msg));
-  }
-
   protected abstract void doProduce(AdaptrisMessage msg, String endpoint) throws ProduceException;
 
   @Override
@@ -151,22 +136,6 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
   @Override
   public final AdaptrisMessage request(AdaptrisMessage msg, long timeout) throws ProduceException {
     return doRequest(msg, endpoint(msg), timeout);
-  }
-
-  @Override
-  @Deprecated
-  @Removal(version = "4.0")
-  public final AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination)
-      throws ProduceException {
-    return request(msg, destination, monitorIntervalMs());
-  }
-
-  @Override
-  @Deprecated
-  @Removal(version = "4.0")
-  public final AdaptrisMessage request(AdaptrisMessage msg, ProduceDestination destination,
-      long timeout) throws ProduceException {
-    return doRequest(msg, resolveProduceDestination(endpoint(msg), destination, msg), timeout);
   }
 
   protected abstract AdaptrisMessage doRequest(AdaptrisMessage msg, String endpoint, long timeout)

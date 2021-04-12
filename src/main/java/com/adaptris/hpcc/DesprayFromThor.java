@@ -30,7 +30,6 @@ import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageProducerImp;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.StandaloneRequestor;
 import com.adaptris.core.lms.FileBackedMessage;
@@ -44,13 +43,15 @@ import lombok.Setter;
  * Despray a file from Thor.
  *
  * <p>
- * Note that although this is an implementation of {@link AdaptrisMessageProducerImp} the {@code AdaptrisMessageProducer#produce()}
- * methods will throw a {@link UnsupportedOperationException}. It should be used as part of a {@link StandaloneRequestor} where the
- * {@link ProduceDestination} returns the logical filename of the file that you wish to retrieve.
+ * Note that although this is an implementation of {@link AdaptrisMessageProducerImp} the
+ * {@code AdaptrisMessageProducer#produce()} methods will throw a
+ * {@link UnsupportedOperationException}. It should be used as part of a {@link StandaloneRequestor}
+ * where the {@link #getLogicalFilename()} returns the logical filename of the file that you wish to
+ * retrieve.
  * </p>
  * <p>
- * The adapter also needs a running {@code dfuplus action=dafilesrv} instance on the machine where the adapter is hosted. Thor will
- * connect to this instance to deliver the files.
+ * The adapter also needs a running {@code dfuplus action=dafilesrv} instance on the machine where
+ * the adapter is hosted. Thor will connect to this instance to deliver the files.
  * </p>
  *
  * @config despray-from-thor

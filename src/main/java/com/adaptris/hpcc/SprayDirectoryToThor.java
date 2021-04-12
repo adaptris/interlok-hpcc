@@ -17,6 +17,7 @@ package com.adaptris.hpcc;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import java.io.File;
+import javax.validation.constraints.NotBlank;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -26,10 +27,11 @@ import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.annotation.InputFieldHint;
-import com.adaptris.validation.constraints.ConfigDeprecated;
 import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.core.CoreException;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.ExceptionHelper;
+import com.adaptris.interlok.util.Args;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.Getter;
 import lombok.Setter;
@@ -83,17 +85,9 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
   @Getter
   @Setter
   @InputFieldHint(expression = true)
+  @NotBlank
   private String sourceDirectory;
-  /**
-   * Set the metadata containing the source directory to upload.
-   *
-   * @deprecated since 3.6.6 use {@link #setSourceDirectory(String)} instead.
-   */
-  @Deprecated
-  @ConfigDeprecated(removalVersion = "4.0.0", message = "use 'source-directory' instead", groups = Deprecated.class)
-  @Getter
-  @Setter
-  private String sourceDirectoryKey;
+
   /**
    * Specify true to delete the source directory after successfully spray into HPCC.
    * <p>
@@ -130,6 +124,12 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
     }
   }
 
+  @Override
+  public void prepare() throws CoreException {
+    Args.notNull(getSourceDirectory(), "source-directory");
+    super.prepare();
+  }
+
 
   private String getSource(AdaptrisMessage msg) throws Exception {
     String result = "";
@@ -139,15 +139,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
   }
 
   private File getSourceDir(AdaptrisMessage msg) throws Exception {
-    File dir = null;
-    if (!isBlank(getSourceDirectoryKey())) {
-      log.warn("source-directory-key is deprecated; use source-directory instead");
-      dir = new File(msg.getMetadataValue(getSourceDirectoryKey()));
-    }
-    else {
-      dir = new File(msg.resolve(getSourceDirectory()));
-    }
-    return dir;
+    return new File(msg.resolve(getSourceDirectory()));
   }
 
   private void postSprayCleanup(AdaptrisMessage msg) throws Exception {
