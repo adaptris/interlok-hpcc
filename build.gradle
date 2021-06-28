@@ -2,10 +2,9 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.filters.*
 
 plugins {
-  id 'java'
-  id 'maven'
+  id 'java-library'
   id 'maven-publish'
-  id  "jacoco"
+  id 'jacoco'
   id 'com.github.spotbugs' version '4.7.1'
   id 'org.owasp.dependencycheck' version '6.2.2'
   id "io.freefair.lombok" version "5.3.3.3"
@@ -44,13 +43,6 @@ ext.hasGraphViz = { ->
 //  }
 }
 
-if (JavaVersion.current().isJava8Compatible()) {
-  allprojects {
-    tasks.withType(Javadoc) {
-      options.addStringOption('Xdoclint:none', '-quiet')
-    }
-  }
-}
 ext.gitBranchNameOrTimestamp = { branchName ->
   if (branchName.equals("HEAD") || branchName.equals("develop") || branchName.startsWith("release")) {
     return new Date().format('HH:mm:ss z');
@@ -77,9 +69,20 @@ version = releaseVersion
 def versionDir = "$buildDir/version"
 generateLombokConfig.enabled = false
 
+// Disable gradle module generation since we probably don't want
+// xxx.module files in your repository.
+tasks.withType(GenerateModuleMetadata) {
+  enabled = false
+}
+
 repositories {
   mavenCentral()
-  maven { url "$defaultNexusRepo" }
+  if (defaultNexusRepo != "unknown") {
+    maven {
+      url "$defaultNexusRepo"
+      allowInsecureProtocol true
+    }
+  }
   maven { url "$nexusBaseUrl/content/groups/public" }
   maven { url "$nexusBaseUrl/content/groups/interlok" }
 }
@@ -119,27 +122,21 @@ configurations.all {
 }
 
 dependencies {
-  compile ("com.adaptris:interlok-core:$interlokCoreVersion") { changing= true}
-  compile ("com.adaptris:interlok-common:$interlokCoreVersion") { changing= true}
-  compile ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
-  compile ("org.slf4j:slf4j-api:$slf4jVersion")
-  compile ("org.apache.commons:commons-exec:1.3")
-  compile ("oro:oro:2.0.8")
+  api ("com.adaptris:interlok-core:$interlokCoreVersion") { changing= true}
+  api ("com.adaptris:interlok-common:$interlokCoreVersion") { changing= true}
+  implementation ("org.slf4j:slf4j-api:$slf4jVersion")
+  implementation ("org.apache.commons:commons-exec:1.3")
+  implementation ("oro:oro:2.0.8")
 
   umlDoclet("nl.talsmasoftware:umldoclet:1.1.4")
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
-  testCompile ('junit:junit:4.13.2')
-  testCompile ("org.mockito:mockito-core:$mockitoVersion")
-  testCompile ("org.mockito:mockito-inline:$mockitoVersion")
+  testImplementation ('junit:junit:4.13.2')
+  testImplementation ("org.slf4j:slf4j-simple:$slf4jVersion")
+  testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing= true }
+  testImplementation ("org.mockito:mockito-core:$mockitoVersion")
+  testImplementation ("org.mockito:mockito-inline:$mockitoVersion")
 
-  testCompile "org.slf4j:slf4j-simple:$slf4jVersion"
-  // exclude any log4j dependencies so that we can just use slf4j simple.
-  // works around INTERLOk-3233
-  testCompile "com.adaptris:interlok-stubs:$interlokCoreVersion", {
-    changing= true
-    exclude group: "org.apache.logging.log4j"
-  }
 
   javadoc("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
   offlineJavadocPackages ("com.adaptris:interlok-core:$interlokCoreVersion:javadoc@jar") { changing= true}
@@ -202,6 +199,7 @@ javadoc {
     options.linksOffline(interlokCommonJavadocs, offlineJavadocPackageDir.getCanonicalPath() + "/interlok-common-$interlokCoreVersion-javadoc.jar")
 
     taglets = ["com.adaptris.taglet.ConfigTaglet", "com.adaptris.taglet.LicenseTaglet"]
+    options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption "tagletpath", configurations.javadoc.asPath
     options.addBooleanOption "-no-module-directories", true
   }
@@ -244,6 +242,7 @@ task umlJavadoc(type: Javadoc) {
 
     taglets = ["com.adaptris.taglet.ConfigTaglet", "com.adaptris.taglet.LicenseTaglet"]
     options.addStringOption "tagletpath", configurations.javadoc.asPath
+    options.addStringOption('Xdoclint:none', '-quiet')
     options.addBooleanOption "-no-module-directories", true
     options.docletpath = configurations.umlDoclet.files.asType(List)
     options.doclet = "nl.talsmasoftware.umldoclet.UMLDoclet"
@@ -345,7 +344,7 @@ spotbugsMain {
 
 dependencyCheck  {
   suppressionFiles= [ "https://raw.githubusercontent.com/adaptris/interlok/develop/gradle/owasp-exclude.xml" ]
-  skipConfigurations = [ "antSql", "spotbugs", "umlDoclet", "offlineJavadocPackages", "javadoc", "jacocoAnt", "jacocoAgent", "spotbugsPlugins", "spotbugsSlf4j" ]
+  scanConfigurations = [ "api", "compileClasspath", "runtimeClasspath" ]
   formats = [ "HTML", "JUNIT" ]
   junitFailOnCVSS = 7.0
   failBuildOnCVSS = 7.0
