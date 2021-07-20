@@ -29,7 +29,7 @@ ext {
   componentDesc="Upload/Download of files via dfuplus executable"
   organizationName = "Adaptris Ltd"
   organizationUrl = "http://interlok.adaptris.net"
-  slf4jVersion = '1.7.31'
+  slf4jVersion = '1.7.32'
   mockitoVersion = '3.11.2'
 }
 
