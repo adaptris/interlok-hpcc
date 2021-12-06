@@ -5,15 +5,15 @@ plugins {
   id 'java-library'
   id 'maven-publish'
   id 'jacoco'
-  id 'com.github.spotbugs' version '4.7.2'
-  id 'org.owasp.dependencycheck' version '6.2.2'
-  id "io.freefair.lombok" version "5.3.3.3"
+  id 'com.github.spotbugs' version '4.7.9'
+  id 'org.owasp.dependencycheck' version '6.5.0.1'
+  id "io.freefair.lombok" version "6.2.0"
 
 }
 
 ext {
-  interlokCoreVersion = project.hasProperty('interlokCoreVersion') ? project.getProperty('interlokCoreVersion') : '4.2-SNAPSHOT'
-  releaseVersion = project.hasProperty('releaseVersion') ? project.getProperty('releaseVersion') : '4.2-SNAPSHOT'
+  interlokCoreVersion = project.hasProperty('interlokCoreVersion') ? project.getProperty('interlokCoreVersion') : '4.3-SNAPSHOT'
+  releaseVersion = project.hasProperty('releaseVersion') ? project.getProperty('releaseVersion') : '4.3-SNAPSHOT'
   nexusBaseUrl = project.hasProperty('nexusBaseUrl') ? project.getProperty('nexusBaseUrl') : 'https://nexus.adaptris.net/nexus'
   mavenPublishUrl = project.hasProperty('mavenPublishUrl') ? project.getProperty('mavenPublishUrl') : nexusBaseUrl + '/content/repositories/snapshots'
   javadocsBaseUrl = nexusBaseUrl + "/content/sites/javadocs/com/adaptris"
@@ -30,7 +30,7 @@ ext {
   organizationName = "Adaptris Ltd"
   organizationUrl = "http://interlok.adaptris.net"
   slf4jVersion = '1.7.32'
-  mockitoVersion = '3.11.2'
+  mockitoVersion = '4.0.0'
 }
 
 ext.hasGraphViz = { ->
@@ -67,7 +67,7 @@ targetCompatibility = JavaVersion.VERSION_11
 group   = 'com.adaptris'
 version = releaseVersion
 def versionDir = "$buildDir/version"
-generateLombokConfig.enabled = false
+lombok.disableConfig = true
 
 // Disable gradle module generation since we probably don't want
 // xxx.module files in your repository.
