@@ -210,7 +210,6 @@ javadoc {
     taglets = ["com.adaptris.taglet.ConfigTaglet", "com.adaptris.taglet.LicenseTaglet"]
     options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption "tagletpath", configurations.javadoc.asPath
-    options.addBooleanOption "-no-module-directories", true
   }
 }
 
@@ -252,7 +251,6 @@ task umlJavadoc(type: Javadoc) {
     taglets = ["com.adaptris.taglet.ConfigTaglet", "com.adaptris.taglet.LicenseTaglet"]
     options.addStringOption "tagletpath", configurations.javadoc.asPath
     options.addStringOption('Xdoclint:none', '-quiet')
-    options.addBooleanOption "-no-module-directories", true
     options.docletpath = configurations.umlDoclet.files.asType(List)
     options.doclet = "nl.talsmasoftware.umldoclet.UMLDoclet"
     options.addStringOption "umlBasePath", destinationDir.getCanonicalPath()
