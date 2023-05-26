@@ -16,11 +16,15 @@
 package com.adaptris.hpcc;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.io.File;
+
 import javax.validation.constraints.NotBlank;
+
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.BooleanUtils;
+
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
@@ -33,6 +37,7 @@ import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.interlok.util.Args;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -40,11 +45,12 @@ import lombok.Setter;
  * Spray the contents of a directory to Thor.
  *
  * <p>
- * Note that this producer <strong>ignores</strong> the current message contents and just sprays the contents of the directory
- * specified by {@link #getSourceDirectoryKey()} using the configured dfuplus command.
+ * Note that this producer <strong>ignores</strong> the current message contents and just sprays the contents of the directory specified by
+ * {@link #getSourceDirectory()} using the configured dfuplus command.
  * </p>
  * <p>
  * Effectively, the program executed is going to similar to
+ *
  * <pre>
  * {@code
       dfuplus action=spray srcfile=/path/to/dir/*
@@ -52,11 +58,12 @@ import lombok.Setter;
         server= nosplit=1 username= password=
    }
  * </pre>
+ *
  * Be aware that nosplit=1 is always added, as well as the "/*".
  * </p>
  * <p>
- * The adapter also needs a running {@code dfuplus action=dafilesrv} instance on the machine where the adapter is hosted. Thor will
- * connect to this instance for file delivery.
+ * The adapter also needs a running {@code dfuplus action=dafilesrv} instance on the machine where the adapter is hosted. Thor will connect
+ * to this instance for file delivery.
  * </p>
  *
  * @author lchan
@@ -65,10 +72,9 @@ import lombok.Setter;
  */
 @XStreamAlias("spray-directory-to-thor")
 @AdapterComponent
-@ComponentProfile(summary = "Spray a directory into HPCC via dfuplus", tag = "producer,hpcc,dfuplus",
-    recommended = {DfuplusConnection.class})
-@DisplayOrder(
-    order = {"logicalFilename", "cluster", "sourceDirectory", "sourceDirectoryKey", "overwrite"})
+@ComponentProfile(summary = "Spray a directory into HPCC via dfuplus", tag = "producer,hpcc,dfuplus", recommended = {
+    DfuplusConnection.class })
+@DisplayOrder(order = { "logicalFilename", "cluster", "sourceDirectory", "overwrite" })
 public class SprayDirectoryToThor extends SprayToThorImpl {
 
   /**
@@ -101,9 +107,7 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
   private Boolean deleteSourceDirectory;
 
   @Override
-  protected void doProduce(AdaptrisMessage msg, String endpoint)
-      throws ProduceException {
-    int exit = 0;
+  protected void doProduce(AdaptrisMessage msg, String endpoint) throws ProduceException {
     // Create DFU command
     // dfuplus action=spray srcfile=/var/lib/HPCCSystems/mydropzone/historical-weather/adapter-agility-historic-out/*
     // dstcluster=mythor dstname=zzlc::json::historical_weather_04 overwrite=1 PREFIX=FILENAME,FILESIZE
@@ -129,7 +133,6 @@ public class SprayDirectoryToThor extends SprayToThorImpl {
     Args.notNull(getSourceDirectory(), "source-directory");
     super.prepare();
   }
-
 
   private String getSource(AdaptrisMessage msg) throws Exception {
     String result = "";

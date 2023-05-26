@@ -1,11 +1,13 @@
 package com.adaptris.hpcc.arguments;
 
-import com.adaptris.core.CoreException;
-import com.adaptris.hpcc.arguments.FixedSprayFormat;
-import org.apache.commons.exec.CommandLine;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import static org.junit.Assert.*;
+import org.apache.commons.exec.CommandLine;
+import org.junit.jupiter.api.Test;
+
+import com.adaptris.core.CoreException;
 
 /**
  * @author mwarman
@@ -40,7 +42,7 @@ public class FixedSprayFormatTest {
     try {
       fixedSprayFormat.prepare();
       fail();
-    } catch (CoreException expected){
+    } catch (CoreException expected) {
       assertEquals("recordSize may not be null", expected.getMessage());
     }
   }

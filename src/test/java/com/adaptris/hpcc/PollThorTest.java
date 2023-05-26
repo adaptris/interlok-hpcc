@@ -20,7 +20,6 @@ import com.adaptris.interlok.junit.scaffolding.ExampleProducerCase;
 
 public class PollThorTest extends ExampleProducerCase {
 
-
   @Override
   protected StandaloneRequestor retrieveObjectForSampleConfig() {
     DfuplusConnection c = new DfuplusConnection();
@@ -33,6 +32,5 @@ public class PollThorTest extends ExampleProducerCase {
     p.setLogicalFilename("~test::test");
     return new StandaloneRequestor(c, p);
   }
-
 
 }
