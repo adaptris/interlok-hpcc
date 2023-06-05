@@ -33,5 +33,4 @@ public class DeleteFromThorTest extends ExampleProducerCase {
     return new StandaloneRequestor(c, p);
   }
 
-
 }

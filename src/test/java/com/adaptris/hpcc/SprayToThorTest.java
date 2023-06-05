@@ -15,16 +15,17 @@
 */
 package com.adaptris.hpcc;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.apache.commons.exec.CommandLine;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.hpcc.arguments.CSVSprayFormat;
 import com.adaptris.hpcc.arguments.FixedSprayFormat;
 import com.adaptris.interlok.junit.scaffolding.ExampleProducerCase;
 
 public class SprayToThorTest extends ExampleProducerCase {
-
 
   @Test
   public void testCSVFormat() throws Exception {
@@ -75,6 +76,5 @@ public class SprayToThorTest extends ExampleProducerCase {
     p.setOverwrite(true);
     return new StandaloneProducer(c, p);
   }
-
 
 }

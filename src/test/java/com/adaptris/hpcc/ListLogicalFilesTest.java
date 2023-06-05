@@ -20,7 +20,6 @@ import com.adaptris.interlok.junit.scaffolding.ExampleProducerCase;
 
 public class ListLogicalFilesTest extends ExampleProducerCase {
 
-
   @Override
   protected StandaloneRequestor retrieveObjectForSampleConfig() {
     DfuplusConnection c = new DfuplusConnection();
@@ -33,6 +32,5 @@ public class ListLogicalFilesTest extends ExampleProducerCase {
     p.setFilemask("~test::*::myfilter");
     return new StandaloneRequestor(c, p);
   }
-
 
 }

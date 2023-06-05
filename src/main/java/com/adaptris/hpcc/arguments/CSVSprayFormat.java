@@ -1,24 +1,51 @@
 package com.adaptris.hpcc.arguments;
 
+import org.apache.commons.exec.CommandLine;
+
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.util.Args;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import org.apache.commons.exec.CommandLine;
 
 /**
- * SprayFormat implementation that allows the configuration of command specific arguments for
- * <code>format=csv</code> sprays.
+ * SprayFormat implementation that allows the configuration of command specific arguments for <code>format=csv</code> sprays.
  *
  * <table>
- *   <tr><td>encoding</td><td>no</td><td>One of the following: ascii, utf8, utf8n, utf16, utf16le, utf16be, utf32, utf32le, utf32be</td><td>ascii</td></tr>
- *   <tr><td>maxrecordsize</td><td>no</td><td>The maximum size of each record, in bytes.</td><td>8192</td></tr>
- *   <tr><td>separator</td><td>no</td><td>The field delimiter.</td><td> comma (\,)</td></tr>
- *   <tr><td>terminator</td><td>no</td><td>The record delimiter.</td><td>line feed or carriage return linefeed (\r,\r\n)</td></tr>
- *   <tr><td>quote</td><td>no</td><td>The string quote character.</td><td> single quote (’).</td></tr>
+ * <tr>
+ * <td>encoding</td>
+ * <td>no</td>
+ * <td>One of the following: ascii, utf8, utf8n, utf16, utf16le, utf16be, utf32, utf32le, utf32be</td>
+ * <td>ascii</td>
+ * </tr>
+ * <tr>
+ * <td>maxrecordsize</td>
+ * <td>no</td>
+ * <td>The maximum size of each record, in bytes.</td>
+ * <td>8192</td>
+ * </tr>
+ * <tr>
+ * <td>separator</td>
+ * <td>no</td>
+ * <td>The field delimiter.</td>
+ * <td>comma (\,)</td>
+ * </tr>
+ * <tr>
+ * <td>terminator</td>
+ * <td>no</td>
+ * <td>The record delimiter.</td>
+ * <td>line feed or carriage return linefeed (\r,\r\n)</td>
+ * </tr>
+ * <tr>
+ * <td>quote</td>
+ * <td>no</td>
+ * <td>The string quote character.</td>
+ * <td>single quote (’).</td>
+ * </tr>
  * </table>
  *
- * <p>NOTE: Defaults are driven by dfuplus command them selves, they will not be set unless explicitly set.</p>
+ * <p>
+ * NOTE: Defaults are driven by dfuplus command them selves, they will not be set unless explicitly set.
+ * </p>
  *
  * @author mwarman
  */
@@ -100,4 +127,5 @@ public class CSVSprayFormat extends SprayFormat {
   public String getTerminator() {
     return terminator;
   }
+
 }
