@@ -141,7 +141,7 @@ dependencies {
   implementation ("org.apache.commons:commons-exec:1.3")
   implementation ("oro:oro:2.0.8")
 
-  umlDoclet("nl.talsmasoftware:umldoclet:2.0.14")
+  umlDoclet("nl.talsmasoftware:umldoclet:2.1.0")
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
   testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.9.3")
