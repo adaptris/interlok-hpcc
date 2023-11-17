@@ -34,5 +34,4 @@ public class DesprayFromThorTest extends ExampleProducerCase {
     return new StandaloneRequestor(c, p);
   }
 
-
 }

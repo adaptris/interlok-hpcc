@@ -1,19 +1,30 @@
 package com.adaptris.hpcc.arguments;
 
 import javax.validation.constraints.NotBlank;
+
 import org.apache.commons.exec.CommandLine;
+
 import com.adaptris.core.CoreException;
 import com.adaptris.core.util.Args;
 import com.adaptris.core.util.ExceptionHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
- * SprayFormat implementation that allows the configuration of command specific arguments for
- * <code>format=fixed</code> sprays.
+ * SprayFormat implementation that allows the configuration of command specific arguments for <code>format=fixed</code> sprays.
  *
  * <table>
- *   <tr><th>argument</th><th>required</th><th>description</th><th>default</th></tr>
- *   <tr><td>recordsize</td><td>yes</td><td>The fixed size of each record, in bytes.</td><td>N/A</td></tr>
+ * <tr>
+ * <th>argument</th>
+ * <th>required</th>
+ * <th>description</th>
+ * <th>default</th>
+ * </tr>
+ * <tr>
+ * <td>recordsize</td>
+ * <td>yes</td>
+ * <td>The fixed size of each record, in bytes.</td>
+ * <td>N/A</td>
+ * </tr>
  * </table>
  *
  * @author mwarman
@@ -26,10 +37,10 @@ public class FixedSprayFormat extends SprayFormat {
   @NotBlank
   private Integer recordSize;
 
-  public FixedSprayFormat(){
+  public FixedSprayFormat() {
   }
 
-  public FixedSprayFormat(int recordSize){
+  public FixedSprayFormat(int recordSize) {
     setRecordSize(recordSize);
   }
 
@@ -57,6 +68,7 @@ public class FixedSprayFormat extends SprayFormat {
   }
 
   public void setRecordSize(Integer recordSize) {
-    this.recordSize = Args.notNull(recordSize, "recordSize");;
+    this.recordSize = Args.notNull(recordSize, "recordSize");
   }
+
 }

@@ -1,11 +1,11 @@
 package com.adaptris.hpcc.arguments;
 
-import org.apache.commons.exec.CommandLine;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+
+import org.apache.commons.exec.CommandLine;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author mwarman

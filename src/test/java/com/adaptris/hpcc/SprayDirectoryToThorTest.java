@@ -36,4 +36,5 @@ public class SprayDirectoryToThorTest extends ExampleProducerCase {
     p.setSourceDirectory("%message{metadataKeyContainingDirectory}");
     return new StandaloneProducer(c, p);
   }
+
 }
