@@ -17,7 +17,10 @@ package com.adaptris.hpcc;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import javax.validation.constraints.NotNull;
+
+import com.adaptris.core.fs.FsHelper;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.FileUtils;
@@ -123,7 +126,7 @@ public class SprayToThor extends SprayToThorImpl {
       // If the message is not file-backed, write it to a temp file
       try {
         if (getTempDirectory() != null) {
-          result = File.createTempFile("adp", ".dat", new File(getTempDirectory()));
+            result = File.createTempFile("adp", ".dat", FsHelper.toFile(getTempDirectory(), new File(getTempDirectory())));
         } else {
           result = File.createTempFile("adp", ".dat");
         }
