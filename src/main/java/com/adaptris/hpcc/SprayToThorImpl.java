@@ -16,7 +16,7 @@
 package com.adaptris.hpcc;
 
 import java.io.IOException;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.lang3.BooleanUtils;
 import com.adaptris.annotation.InputFieldDefault;

@@ -16,7 +16,7 @@
 package com.adaptris.hpcc;
 
 import java.io.PrintWriter;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import org.apache.commons.exec.CommandLine;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;

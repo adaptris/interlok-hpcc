@@ -18,7 +18,7 @@ package com.adaptris.hpcc;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.adaptris.core.fs.FsHelper;
 import org.apache.commons.exec.CommandLine;
