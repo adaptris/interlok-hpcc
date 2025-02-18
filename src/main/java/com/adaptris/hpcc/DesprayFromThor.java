@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.URISyntaxException;
+
+import com.adaptris.core.fs.FsHelper;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.IOUtils;
@@ -99,10 +102,10 @@ public class DesprayFromThor extends SingleFileRequest {
   }
 
 
-  private File createAndTrackFile(Object marker) throws IOException {
+  private File createAndTrackFile(Object marker) throws IOException, URISyntaxException {
     File result = null;
     if (getTempDirectory() != null) {
-      result = File.createTempFile(this.getClass().getSimpleName(), "", new File(getTempDirectory()));
+        result = File.createTempFile(this.getClass().getSimpleName(), "", FsHelper.toFile(getTempDirectory(), new File(getTempDirectory())));
     } else {
       result = File.createTempFile(this.getClass().getSimpleName(), "");
     }
