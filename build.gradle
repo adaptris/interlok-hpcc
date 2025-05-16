@@ -360,7 +360,6 @@ dependencyCheck  {
   }
   analyzers {
     assemblyEnabled=false
-    
   }
 }
 
