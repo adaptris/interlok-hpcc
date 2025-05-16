@@ -5,7 +5,7 @@ plugins {
   id "java-library"
   id "maven-publish"
   id "jacoco"
-  id "com.github.spotbugs" version "6.1.10"
+  id "com.github.spotbugs" version "6.1.11"
   id "org.sonarqube" version "6.1.0.5360"
   id "org.owasp.dependencycheck" version "12.1.1"
   id "io.freefair.lombok" version "8.13.1"
@@ -153,7 +153,8 @@ dependencies {
   umlDoclet("nl.talsmasoftware:umldoclet:2.1.0")
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
-  testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.11.4")
+  testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.12.2")
+    testImplementation ("org.junit.platform:junit-platform-launcher:1.12.1")
   testImplementation ("org.slf4j:slf4j-simple:$slf4jVersion")
   testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing= true }
   testImplementation ("org.mockito:mockito-core:$mockitoVersion")
