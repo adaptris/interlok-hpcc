@@ -98,6 +98,7 @@ allprojects {
 }
 
 repositories {
+  mavenLocal()
   mavenCentral()
   if (defaultNexusRepo != "unknown") {
     maven {
