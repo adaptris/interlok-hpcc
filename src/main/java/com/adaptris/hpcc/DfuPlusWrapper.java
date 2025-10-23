@@ -121,11 +121,6 @@ public abstract class DfuPlusWrapper extends AdaptrisMessageProducerImp {
   public void prepare() throws CoreException {
   }
 
-  @Override
-  public final void produce(AdaptrisMessage msg) throws ProduceException {
-    doProduce(msg, endpoint(msg));
-  }
-
   protected abstract void doProduce(AdaptrisMessage msg, String endpoint) throws ProduceException;
 
   @Override
