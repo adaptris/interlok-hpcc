@@ -18,7 +18,7 @@ package com.adaptris.hpcc;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import java.io.File;
 import java.io.IOException;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import org.apache.commons.exec.CommandLine;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;

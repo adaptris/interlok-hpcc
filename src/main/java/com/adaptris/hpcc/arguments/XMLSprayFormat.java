@@ -1,6 +1,6 @@
 package com.adaptris.hpcc.arguments;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import org.apache.commons.exec.CommandLine;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.core.CoreException;
